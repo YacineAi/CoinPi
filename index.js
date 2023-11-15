@@ -9,6 +9,7 @@ app.get('/', (req, res) => {
     res.sendStatus(200)
 });
 
+
 const headers = {
     "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
     "accept-language": "en,ar-DZ;q=0.9,ar;q=0.8",
@@ -83,7 +84,7 @@ app.get('/fetch', async (req, res) => {
             var parseEval = JSON.parse(stringEval);
             var discount = () => {
                 if (parseEval.data.priceComponent.coinDiscountText == undefined) {
-                    return "none"
+                    return "لا توجد نسبة تخفيض بالعملات ❎"
                 } else {
                     return parseEval.data.priceComponent.coinDiscountText
                 }
@@ -161,117 +162,6 @@ app.get('/fetch', async (req, res) => {
 
             result['limited'] = shaped;
             res.json(result);
-          } else {
-            console.error('Unable to extract window.runParams data.');
-          }
-
-    } catch (error) {
-        
-    }
-});
-
-
-
-app.get('/points', async (req, res) => {
-    const { id } = req.query;
-    try {
-        const resp = await axios.get(`https://ar.aliexpress.com/i/${id}.html?sourceType=620&aff_fcid=`, { headers });
-        const $ = cheerio.load(resp.data);
-        const scriptTag = $('script:contains("window.runParams")');
-        const scriptContent = scriptTag.html();
-        const match = /window\.runParams\s*=\s*({.*?});/s.exec(scriptContent);
-
-        if (match && match[1]) {
-            const evaluatedDataString = eval(`(${match[1]})`);
-            var string = JSON.stringify(evaluatedDataString);
-            var prsd = JSON.parse(string);
-            var discount = () => {
-                if (prsd.data.priceComponent.coinDiscountText == undefined) {
-                    return "none"
-                } else {
-                    return prsd.data.priceComponent.coinDiscountText
-                }
-            }
-            var price_fun =() =>{
-                if(prsd.data.priceComponent.discountPrice.actMinDisplayPrice == undefined){
-                    return prsd.data.priceComponent.origPrice.minAmount.formatedAmount
-                }else{
-                    return prsd.data.priceComponent.discountPrice.actMinDisplayPrice
-                }
-            }
-            var data = {
-                discountPrice:price_fun(),
-                discount: discount(),
-            }
-            res.json(data);
-          } else {
-            console.error('Unable to extract window.runParams data.');
-          }
-
-    } catch (error) {
-        
-    }
-});
-
-app.get('/super', async (req, res) => {
-    const { id } = req.query;
-    try { 
-        const resp = await axios.get(`https://ar.aliexpress.com/i/${id}.html?sourceType=562&aff_fcid=`, { headers });
-        const $ = cheerio.load(resp.data);
-        const scriptTag = $('script:contains("window.runParams")');
-        const scriptContent = scriptTag.html();
-        const match = /window\.runParams\s*=\s*({.*?});/s.exec(scriptContent);
-        
-        if (match && match[1]) {
-            const evaluatedDataString = eval(`(${match[1]})`);
-            var string = JSON.stringify(evaluatedDataString);
-            var prsd = JSON.parse(string);
-            var price_fun =() =>{
-                if(prsd.data.priceComponent.discountPrice.actMinDisplayPrice == undefined){
-                    return prsd.data.priceComponent.origPrice.minAmount.formatedAmount
-                }else{
-                    return prsd.data.priceComponent.discountPrice.actMinDisplayPrice
-                }
-            }
-    
-            var data = {
-                price:price_fun(),
-            }
-            res.json(data);
-          } else {
-            console.error('Unable to extract window.runParams data.');
-          }
-
-    } catch (error) {
-        
-    }
-});
-
-app.get('/limited', async (req, res) => {
-    const { id } = req.query;
-    try {
-        const resp = await axios.get(`https://ar.aliexpress.com/i/${id}.html?sourceType=561&aff_fcid=`, { headers });
-        const $ = cheerio.load(resp.data);
-        const scriptTag = $('script:contains("window.runParams")');
-        const scriptContent = scriptTag.html();
-        const match = /window\.runParams\s*=\s*({.*?});/s.exec(scriptContent);
-
-        if (match && match[1]) {
-            const evaluatedDataString = eval(`(${match[1]})`);
-            var string = JSON.stringify(evaluatedDataString);
-            var prsd = JSON.parse(string);
-            var price_fun =() =>{
-                if(prsd.data.priceComponent.discountPrice.actMinDisplayPrice == undefined){
-                    return prsd.data.priceComponent.origPrice.minAmount.formatedAmount
-                }else{
-                    return prsd.data.priceComponent.discountPrice.actMinDisplayPrice
-                }
-            };
-    
-            var data = {
-                price: price_fun(),
-            }
-            res.json(data);
           } else {
             console.error('Unable to extract window.runParams data.');
           }
