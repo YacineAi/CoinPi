@@ -38,7 +38,7 @@ app.get('/fetch', async (req, res) => {
     try {
         const result = {};
 
-        const normal = await axios.get(`https://ar.aliexpress.com/item/${id}.html`, { headers });
+        const normal = await axios.get(`https://www.aliexpress.com/item/${id}.html`, { headers });
         const $ = cheerio.load(normal.data);
         const normalHtml = $('script:contains("window.runParams")');
         const normalContent = normalHtml.html();
@@ -89,7 +89,7 @@ app.get('/fetch', async (req, res) => {
 
           /* ---- Points ---- */
 
-          const points = await axios.get(`https://ar.aliexpress.com/i/${id}.html?sourceType=620&aff_fcid=`, { headers });
+          const points = await axios.get(`https://www.aliexpress.com/i/${id}.html?sourceType=620&aff_fcid=`, { headers });
           const $1 = cheerio.load(points.data);
           const pointsHtml = $1('script:contains("window.runParams")');
           const pointsContent = pointsHtml.html();
@@ -125,7 +125,7 @@ app.get('/fetch', async (req, res) => {
 
           /* ---- Super ---- */
 
-          const superdeals = await axios.get(`https://ar.aliexpress.com/i/${id}.html?sourceType=562&aff_fcid=`, { headers });
+          const superdeals = await axios.get(`https://www.aliexpress.com/i/${id}.html?sourceType=562&aff_fcid=`, { headers });
           const $2 = cheerio.load(superdeals.data);
           const superHtml = $2('script:contains("window.runParams")');
           const superContent = superHtml.html();
@@ -154,7 +154,7 @@ app.get('/fetch', async (req, res) => {
 
           /* ---- Limited ---- */
           
-          const limited = await axios.get(`https://ar.aliexpress.com/i/${id}.html?sourceType=561&aff_fcid=`, { headers });
+          const limited = await axios.get(`https://www.aliexpress.com/i/${id}.html?sourceType=561&aff_fcid=`, { headers });
           const $3 = cheerio.load(limited.data);
           const limitedHtml = $('script:contains("window.runParams")');
           const limitedContent = limitedHtml.html();
