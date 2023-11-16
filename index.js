@@ -2,6 +2,8 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const express = require('express');
 const app = express();
+const https = require('https');
+
 
 app.use(express.json());
 
@@ -9,6 +11,21 @@ app.get('/', (req, res) => {
     res.sendStatus(200)
 });
 
+app.get('/ping', (req, res) => {
+    res.status(200).json({ message: 'Ping successful' });
+  });
+  
+function keepAppRunning() {
+    setInterval(() => {
+      https.get(`${process.env.RENDER_EXTERNAL_URL}/ping`, (resp) => {
+        if (resp.statusCode === 200) {
+          console.log('Ping successful');
+        } else {
+          console.error('Ping failed');
+        }
+      });
+    }, 5 * 60 * 1000); // 5 minutes in milliseconds
+  }
 
 const headers = {
     "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
@@ -173,5 +190,6 @@ app.get('/fetch', async (req, res) => {
 
 
 app.listen(3000, () => {
-    console.log('App listening on port 3000!');
-});
+    console.log(`App is on port : 3000`);
+    keepAppRunning();
+  });
