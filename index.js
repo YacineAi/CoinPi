@@ -84,6 +84,7 @@ app.get('/fetch', async (req, res) => {
             }
             result['normal'] = shaped;
           } else {
+            res.json({ ok : false});
             console.error('Unable to extract window.runParams data.');
           }
 
