@@ -23,7 +23,7 @@ function keepAppRunning() {
           console.error('Ping failed');
         }
       });
-    }, 5 * 60 * 1000); // 5 minutes in milliseconds
+    }, 5 * 60 * 1000);
   }
 
 const headers = {
@@ -92,7 +92,8 @@ app.get('/fetch', async (req, res) => {
                 if (parseEval.data.priceComponent.coinDiscountText == undefined) {
                     return "لا توجد نسبة تخفيض بالعملات ❎"
                 } else {
-                    return parseEval.data.priceComponent.coinDiscountText
+                  var clean = parseEval.data.priceComponent.coinDiscountText.match(/\d+/g);
+                  return `خصم النقاط ${clean}%`
                 }
             };
 
@@ -104,9 +105,21 @@ app.get('/fetch', async (req, res) => {
               }
             };
 
+            var total = () => {
+              if (parseEval.data.priceComponent.coinDiscountText != undefined) {
+                var pers = parseEval.data.priceComponent.coinDiscountText.match(/\d+/g);
+                var prs = price_fun().match(/\d+/g);
+                const total = parseInt(prs) - (parseInt(prs) * parseInt(pers)) / 100;
+                return `US $${total}`;
+              } else {
+                  return price_fun();
+              }
+            };
+
             var shaped = {
                 discountPrice: price_fun(),
                 discount: discount(),
+                total: total(),
             };
             
             result['points'] = shaped;
