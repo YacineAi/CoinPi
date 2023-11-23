@@ -4,7 +4,6 @@ const express = require('express');
 const app = express();
 const https = require('https');
 
-
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -37,7 +36,6 @@ app.get('/fetch', async (req, res) => {
     const { id } = req.query;
     try {
         const result = {};
-
         const normal = await axios.get(`https://ar.aliexpress.com/item/${id}.html`, { headers });
         const $ = cheerio.load(normal.data);
         const normalHtml = $('script:contains("window.runParams")');
@@ -48,40 +46,29 @@ app.get('/fetch', async (req, res) => {
             const evaluatedDataString = eval(`(${normalMatch[1]})`);
             var string = JSON.stringify(evaluatedDataString);
             var prsd = JSON.parse(string);
+
             var shipping = () => {
                 if (prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.displayAmount == undefined) {
                     return "Free Shipping"
                 } else {
                     return prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.displayAmount
                 }
-            }
-            var discount = () => {
-                if (prsd.data.priceComponent.coinDiscountText == undefined) {
-                    return "لايتوفر تخفيض بالعملات"
-                } else {
-                    return prsd.data.priceComponent.coinDiscountText
-                }
             };
-            var price_fun =() => {
-                if (prsd.data.priceComponent.discountPrice.actMinDisplayPrice == undefined) {
-                    return prsd.data.priceComponent.origPrice.minAmount.formatedAmount
-                } else {
-                    return prsd.data.priceComponent.discountPrice.actMinDisplayPrice
-                }
-            };
+
             var shaped = {
                 name: prsd.data.metaDataComponent.title,
                 image: prsd.data.imageComponent.imagePathList[0],
                 shipping: shipping(),
                 rate: prsd.data.feedbackComponent.evarageStar,
                 totalRates: prsd.data.feedbackComponent.totalValidNum,
-                price: price_fun(),
-                discountPrice: prsd.data.priceComponent.discountPrice.actMinDisplayPrice,
+                price: prsd.data.priceComponent.origPrice.minAmount.formatedAmount,
+                discountPrice: prsd.data.priceComponent.discountPrice.minActivityAmount.formatedAmount,
                 sales: prsd.data.tradeComponent.formatTradeCount,
-                discount: discount(),
+                discount: prsd.data.promotionComponent.discountTips,
                 store: prsd.data.sellerComponent.storeName,
                 storeRate: prsd.data.storeFeedbackComponent.sellerPositiveRate
-            }
+            };
+
             result['normal'] = shaped;
           } else {
             console.error('Unable to extract window.runParams data.');
@@ -99,25 +86,28 @@ app.get('/fetch', async (req, res) => {
             const evalit = eval(`(${pointsMatch[1]})`);
             var stringEval = JSON.stringify(evalit);
             var parseEval = JSON.parse(stringEval);
+
             var discount = () => {
                 if (parseEval.data.priceComponent.coinDiscountText == undefined) {
                     return "لا توجد نسبة تخفيض بالعملات ❎"
                 } else {
                     return parseEval.data.priceComponent.coinDiscountText
                 }
-            }
-            var price_fun =() =>{
-                if(parseEval.data.priceComponent.discountPrice.actMinDisplayPrice == undefined){
-                    return parseEval.data.priceComponent.origPrice.minAmount.formatedAmount
-                }else{
-                    return parseEval.data.priceComponent.discountPrice.actMinDisplayPrice
-                }
-            }
+            };
+
+            var price_fun = () => {
+              if (parseEval.data.priceComponent.discountPrice.minActivityAmount != undefined) {
+                  return parseEval.data.priceComponent.discountPrice.minActivityAmount.formatedAmount;
+              } else {
+                  return parseEval.data.priceComponent.origPrice.minAmount.formatedAmount;
+              }
+            };
+
             var shaped = {
                 discountPrice: price_fun(),
                 discount: discount(),
             };
-
+            
             result['points'] = shaped;
           } else {
             console.error('Unable to extract window.runParams data.');
@@ -132,17 +122,17 @@ app.get('/fetch', async (req, res) => {
           const superMatch = /window\.runParams\s*=\s*({.*?});/s.exec(superContent);
           
           if (superMatch && superMatch[1]) {
-            const evalit = eval(`(${superMatch[1]})`);
+            const  evalit = eval(`(${superMatch[1]})`);
             var stringEval = JSON.stringify(evalit);
             var parseEval = JSON.parse(stringEval);
-            var price_fun =() => {
-                if (parseEval.data.priceComponent.discountPrice.actMinDisplayPrice == undefined) {
-                    return parseEval.data.priceComponent.origPrice.minAmount.formatedAmount
-                }else{
-                    return parseEval.data.priceComponent.discountPrice.actMinDisplayPrice
-                }
+            var price_fun = () => {
+              if (parseEval.data.priceComponent.discountPrice.minActivityAmount != undefined) {
+                  return parseEval.data.priceComponent.discountPrice.minActivityAmount.formatedAmount;
+              } else {
+                  return parseEval.data.priceComponent.origPrice.minAmount.formatedAmount;
+              }
             };
-    
+
             var shaped = {
                 price: price_fun(),
             };
@@ -166,16 +156,16 @@ app.get('/fetch', async (req, res) => {
             var parseEval = JSON.parse(stringEval);
 
             var price_fun = () => {
-                if(parseEval.data.priceComponent.discountPrice.actMinDisplayPrice == undefined){
-                    return parseEval.data.priceComponent.origPrice.minAmount.formatedAmount
-                }else{
-                    return parseEval.data.priceComponent.discountPrice.actMinDisplayPrice
-                }
+              if (parseEval.data.priceComponent.discountPrice.minActivityAmount != undefined) {
+                  return parseEval.data.priceComponent.discountPrice.minActivityAmount.formatedAmount;
+              } else {
+                  return parseEval.data.priceComponent.origPrice.minAmount.formatedAmount;
+              }
             };
-    
+
             var shaped = {
                 price: price_fun(),
-            }
+            };
 
             result['limited'] = shaped;
             res.json(result);
