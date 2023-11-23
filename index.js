@@ -55,6 +55,14 @@ app.get('/fetch', async (req, res) => {
                 }
             };
 
+            var discount = () => {
+              if (prsd.data.priceComponent.coinDiscountText == undefined) {
+                  return "لا يوجد خصم إضافي ❎"
+              } else {
+                return prsd.data.priceComponent.coinDiscountText
+              }
+            };
+
             var shaped = {
                 name: prsd.data.metaDataComponent.title,
                 image: prsd.data.imageComponent.imagePathList[0],
@@ -64,7 +72,7 @@ app.get('/fetch', async (req, res) => {
                 price: prsd.data.priceComponent.origPrice.minAmount.formatedAmount,
                 discountPrice: prsd.data.priceComponent.discountPrice.minActivityAmount.formatedAmount,
                 sales: prsd.data.tradeComponent.formatTradeCount,
-                discount: prsd.data.promotionComponent.discountTips,
+                discount: discount(),
                 store: prsd.data.sellerComponent.storeName,
                 storeRate: prsd.data.storeFeedbackComponent.sellerPositiveRate
             };
@@ -110,7 +118,7 @@ app.get('/fetch', async (req, res) => {
                 var pers = parseEval.data.priceComponent.coinDiscountText.match(/\d+/g);
                 var prs = price_fun().match(/\d+/g);
                 const total = parseInt(prs) - (parseInt(prs) * parseInt(pers)) / 100;
-                return `US $${total}`;
+                return `US $${total.toFixed(2)}`;
               } else {
                   return price_fun();
               }
