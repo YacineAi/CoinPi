@@ -231,6 +231,7 @@ app.get('/detail', async (req, res) => {
             }
           };
 
+          /*
           var variants = () => {
             const skuls = [];
             const skuArray = JSON.parse(prsd.data.priceComponent.skuJson);
@@ -270,7 +271,7 @@ app.get('/detail', async (req, res) => {
               return "none"
             }
           };
-
+          */
           var shaped = {
               name: prsd.data.metaDataComponent.title,
               cover: prsd.data.imageComponent.imagePathList[0],
@@ -281,12 +282,12 @@ app.get('/detail', async (req, res) => {
               discountPrice: prsd.data.priceComponent.discountPrice.minActivityAmount != undefined && prsd.data.priceComponent.discountPrice.minActivityAmount.value || "No discount Price",
               sales: prsd.data.tradeComponent.formatTradeCount,
               discount: discount(),
-              variants: variants(),
+              //variants: variants(),
               store: prsd.data.sellerComponent.storeName,
               storeRate: prsd.data.storeFeedbackComponent.sellerPositiveRate
           };
           //result['normal'] = shaped;
-          const skuArray = JSON.parse(prsd.data.priceComponent.skuJson);
+          //const skuArray = JSON.parse(prsd.data.priceComponent.skuJson);
           //const skuImagesArray = prsd.data.skuComponent;
           res.json(shaped);
         } else {
