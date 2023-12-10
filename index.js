@@ -198,6 +198,105 @@ app.get('/fetch', async (req, res) => {
 });
 
 
+
+
+app.get('/detail', async (req, res) => {
+  const { id } = req.query;
+  try {
+      const result = {};
+      const normal = await axios.get(`https://ar.aliexpress.com/item/${id}.html`, { headers });
+      const $ = cheerio.load(normal.data);
+      const normalHtml = $('script:contains("window.runParams")');
+      const normalContent = normalHtml.html();
+      const normalMatch = /window\.runParams\s*=\s*({.*?});/s.exec(normalContent);
+
+      if (normalMatch && normalMatch[1]) {
+          const evaluatedDataString = eval(`(${normalMatch[1]})`);
+          var string = JSON.stringify(evaluatedDataString);
+          var prsd = JSON.parse(string);
+
+          var shipping = () => {
+              if (prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.displayAmount == undefined) {
+                  return "Free Shipping"
+              } else {
+                  return prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.displayAmount
+              }
+          };
+
+          var discount = () => {
+            if (prsd.data.priceComponent.coinDiscountText == undefined) {
+                return "لا يوجد خصم إضافي ❎"
+            } else {
+              return prsd.data.priceComponent.coinDiscountText
+            }
+          };
+
+          var variants = () => {
+            const skuls = [];
+            const skuArray = JSON.parse(prsd.data.priceComponent.skuJson);
+            if (prsd.data.skuComponent.hasSkuProperty == true) {
+              for(const skul of prsd.data.skuComponent.productSKUPropertyList[0].skuPropertyValues) {
+                var content = {
+                  id: skul.propertyValueIdLong,
+                  name: skul.propertyValueDefinitionName,
+                  image: skul.skuPropertyImagePath,
+                  miniImage: skul.skuPropertyImageSummPath,
+                  propName: skul.propertyValueName,
+                  colorCode: skul.skuColorValue,
+                };
+                skuls.push(content)
+              }
+              const linkedData = skuls.map(variant => {
+                const matchedSku = skuArray.find(sku => {
+                  // Modify the comparison based on your data structure
+                  return parseInt(variant.id) === parseInt(sku.skuPropIds);
+                });
+              
+                if (matchedSku) {
+                  return {
+                    ...variant,
+                    price: matchedSku.skuVal.skuActivityAmount.value,
+                    oldPrice: matchedSku.skuVal.skuAmount.value,
+                    discount: matchedSku.skuVal.discountTips,
+                    available: matchedSku.salable,
+                  };
+                }
+              
+                return variant;
+              });
+
+              return linkedData;
+            } else {
+              return "none"
+            }
+          };
+
+          var shaped = {
+              name: prsd.data.metaDataComponent.title,
+              cover: prsd.data.imageComponent.imagePathList[0],
+              shipping: shipping(),
+              rate: prsd.data.feedbackComponent.evarageStar,
+              totalRates: prsd.data.feedbackComponent.totalValidNum,
+              price: prsd.data.priceComponent.origPrice.minAmount.value,
+              discountPrice: prsd.data.priceComponent.discountPrice.minActivityAmount != undefined && prsd.data.priceComponent.discountPrice.minActivityAmount.value || "No discount Price",
+              sales: prsd.data.tradeComponent.formatTradeCount,
+              discount: discount(),
+              variants: variants(),
+              store: prsd.data.sellerComponent.storeName,
+              storeRate: prsd.data.storeFeedbackComponent.sellerPositiveRate
+          };
+          //result['normal'] = shaped;
+          const skuArray = JSON.parse(prsd.data.priceComponent.skuJson);
+          //const skuImagesArray = prsd.data.skuComponent;
+          res.json(shaped);
+        } else {
+          res.json({ ok : false});
+          console.error('Unable to extract window.runParams data.');
+        }
+  } catch (error) {
+      console.log(error.message)
+  }
+});
 app.listen(3000, () => {
     console.log(`App is on port : 3000`);
     keepAppRunning();
