@@ -214,7 +214,8 @@ app.get('/detail', async (req, res) => {
           const match = decodedUrl.match(regex);
           if (match && match[1]) {
             return match[1];
-          } else if (decodedUrl.includes('/item/') || decodedUrl.includes('/i/')) {
+          } else if (decodedUrl.includes('/item/')) {
+            // Handle the additional AliExpress URL pattern directly
             const regexItem = /\/(\d+)\.html/;
             const matchItem = decodedUrl.match(regexItem);
             if (matchItem && matchItem[1]) {
