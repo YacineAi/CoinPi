@@ -165,7 +165,7 @@ app.get('/fetch', async (req, res) => {
           
           const limited = await axios.get(`https://ar.aliexpress.com/i/${id}.html?sourceType=561&aff_fcid=`, { headers });
           const $3 = cheerio.load(limited.data);
-          const limitedHtml = $('script:contains("window.runParams")');
+          const limitedHtml = $3('script:contains("window.runParams")');
           const limitedContent = limitedHtml.html();
           const limitedMatch = /window\.runParams\s*=\s*({.*?});/s.exec(limitedContent);
           
