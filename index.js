@@ -203,8 +203,36 @@ app.get('/fetch', async (req, res) => {
 app.get('/detail', async (req, res) => {
   const { id } = req.query;
   try {
-      const result = {};
-      const normal = await axios.get(`https://ar.aliexpress.com/item/${id}.html`, { headers });
+    const idCatcher = async (id) => {
+      if (/^\d+$/.test(id)) {
+        return id;
+      } else if (id.includes("aliexpress.com")) {
+        try {
+          const response = await axios.head(id, { maxRedirects: 0, validateStatus: (status) => status >= 200 && status < 400 });
+          const decodedUrl = decodeURIComponent(response.headers.location);
+          const regex = /\/(\d+)\.html/;
+          const match = decodedUrl.match(regex);
+          if (match && match[1]) {
+            return match[1];
+          } else if (decodedUrl.includes('/item/') || decodedUrl.includes('/i/')) {
+            const regexItem = /\/(\d+)\.html/;
+            const matchItem = decodedUrl.match(regexItem);
+            if (matchItem && matchItem[1]) {
+              return matchItem[1];
+            }
+          }
+        } catch (error) {
+          console.error('Error occurred while fetching the URL:', error);
+          res.status(400).json({ ok: false, error: 'Invalid URL provided' });
+          return null;
+        }
+      }
+      console.error('Invalid ID or URL provided');
+      res.status(400).json({ ok: false, error: 'Invalid ID or URL provided' });
+      return null;
+    };
+      const finalid = await idCatcher(id);
+      const normal = await axios.get(`https://ar.aliexpress.com/item/${finalid}.html`, { headers });
       const $ = cheerio.load(normal.data);
       const normalHtml = $('script:contains("window.runParams")');
       const normalContent = normalHtml.html();
@@ -273,7 +301,7 @@ app.get('/detail', async (req, res) => {
           };
           */
           var shaped = {
-              name: prsd.data.metaDataComponent.title,
+              name: prsd.data.metaDataComponent.title.replace("| |   - AliExpress", ""),
               cover: prsd.data.imageComponent.imagePathList[0],
               shipping: shipping(),
               rate: prsd.data.feedbackComponent.evarageStar,
