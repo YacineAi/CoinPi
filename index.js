@@ -203,6 +203,9 @@ app.get('/fetch', async (req, res) => {
 
 app.get('/detail', async (req, res) => {
   const { id } = req.query;
+  const headers = {
+    "cookie": "xman_f=xqfzYoJKcG4wBVaigDy/gBwOqZUCvLlUXTHqo3mKJly7Wmx+xLy2DezaMxUF2mT6ZzRAdutEElIbpP8i6eHimxSl+4z2+mJY0naPzYFgXpIR6kp23kdzvTKNBR7RnKNxpsnNdI8ifMlpKPBDwSQhGkOQAUaVo0RcnygDa4rilD/g2mYQ9WKVxb5wC26yh3pBvXsMEO2kbeKk3oUG5/6ExM93W5kxj2xHs7x/4CJwycehRVHKUU5C6JsYCiFv6xglcsfHNtv61iln+E1QbqBIMISkLIlGT45m29NW3gjiY0ttNlhHyOfXUDUjykW/eruUkaU8PCHiLtQaVM6pRCbXqv19v9W99qsVZ4CnOalQ8c5sDRBj1CQgg0A9buGTHfE6QW8mlDC9W79BYioM3yGBJRF7Z1jtr4QW; xman_t=Le0GPnIrn0+aOAtC69GXG8SSc/WTeBMiJ4rQVDdOo1Ogm14Kd9PCAKFJAtkVuIa1vCClcZXeQ4S3z8C+BsNh8yzwvjj1Gc6YnJ0XZLUxhXk1RoJWTp0RxuMRBMJII8ujnDrVn9MkI96LHwp0l8/HsLpNgKiaYPSzeinzUggyyk4Fw5u6/CUQ18rBwhZcWebDvy7+jpt5FskYgKZjQct6WDc+yJquJlm33T3cWr5hukXLYvTKYupxWasaiwdG/sKlHaDjI6dFlzGzBen+NHGQjbalF0hCXzlX0QGlRF5gKh8f0fOgVYK2gXpNaDwUWQVR9F9nZh4cEjbQtba3aEd6cjC1jWL68Svt5khc2PosJEdIBk+8BKh7Lte898Y2gcu5KUNn4n5+RBpQNyCJUAoDujwbJ+NxwmrKToTZ0gHjsPowcdBGh/cj2/bHmSeuVGbx+xwZ82Puuba69oqbn5E1wvRcjk/MAE4i+vINHCFzUPl7cmGG1RHd4jvAJ6c0BqGXOhpP4TJLIiRphOXcAClQGXt498b7BkzMYvlSY73BrUXg94rJiz55dNx1rb8rXPpD+/PemjlgKDtV9BENrNkHigh7+yGYEN3lo5YAjAZinVlfHRi0Ojngq0arK3h9/gvVvZWydmMlqloSB5Kze6NEmyqTSOHK/Yd3Tc9QhDD2sdgLN2pdC1DuO8qWg0JXqpfwVaX7psexHArKM5Vb6n42/EDxN9hUwNSAUbhQCVJl9ygyzZiuKCQPR3eKqAZcp1pz; aep_usuc_f=site=vnm&province=null&city=null&c_tp=USD&x_alimid=2720217087&ups_d=1|1|1|1&re_sns=google&isb=y&ups_u_t=1715367049691&region=DZ&b_locale=en_US&ae_u_p_s=2"
+  };
   try {
     const idCatcher = async (id) => {
       if (/^\d+$/.test(id)) {
@@ -319,6 +322,9 @@ app.get('/detail', async (req, res) => {
           //result['normal'] = shaped;
           //const skuArray = JSON.parse(prsd.data.priceComponent.skuJson);
           //const skuImagesArray = prsd.data.skuComponent;
+
+          // shipFromCode // webGeneralFreightCalculateComponent
+
           res.json(shaped);
         } else {
           res.json({ ok : false});
