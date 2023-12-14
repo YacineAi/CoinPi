@@ -206,8 +206,6 @@ app.get('/fetch', async (req, res) => {
 });
 
 
-
-
 app.get('/detail', async (req, res) => {
   const { id } = req.query;
   const headers = {
@@ -310,10 +308,10 @@ app.get('/detail', async (req, res) => {
                   if (sku.skuPropIds.includes(shippingPropertyId)) { resultArray.push(sku); }
                 });
                 const mappedResultArray = resultArray.map((result) => { return { attr: result.skuAttr, id: result.skuId, idStr: result.skuIdStr, linked: result.skuPropIds, available: result.skuVal.availQuantity, price: result.skuVal.skuActivityAmount != undefined && result.skuVal.skuActivityAmount.value || result.skuVal.skuAmount.value, oldPrice: result.skuVal.skuAmount.value }; });
-                return { propinfo: mappedResultArray, props: SKUPropertyList[0].skuPropertyValues };
+                return { propinfo: mappedResultArray, props: SKUPropertyList };
               } else {
                 const mappedskuArray = skuArray.map((result) => { return { attr: result.skuAttr, id: result.skuId, idStr: result.skuIdStr, linked: result.skuPropIds, available: result.skuVal.availQuantity, price: result.skuVal.skuActivityAmount != undefined && result.skuVal.skuActivityAmount.value || result.skuVal.skuAmount.value, oldPrice: result.skuVal.skuAmount.value }; });
-                return { propinfo: mappedskuArray, props : SKUPropertyList[0].skuPropertyValues };
+                return { propinfo: mappedskuArray, props : SKUPropertyList };
               }
             }
           
