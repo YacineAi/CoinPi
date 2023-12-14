@@ -28,10 +28,17 @@ function keepAppRunning() {
 
 app.get('/fetch', async (req, res) => {
     const { id } = req.query;
-    const { region } = req.query || "DZ";
-    
+    const { region } = req.query;
+    const defaultRegion = region || "DZ";
+    const cookier = () => {
+      if (defaultRegion == "DZ") {
+        return "ali_apache_id=33.3.20.111.1702585962650.678888.4; acs_usuc_t=x_csrf=8nx8qrep9exs&acs_rt=485dca3186c64e8eb354206aba5405ac; AKA_A2=A; _m_h5_tk=10ba1bb6aecdb672824f066d0c526c8e_1702587856981; _m_h5_tk_enc=7750008d64513183ab439d261cee7b17; e_id=pt70; xlly_s=1; _gid=GA1.2.2136155133.1702585970; _gcl_au=1.1.1695213607.1702585971; cna=c1QCHmBmNB0CAYEteA6D0PDJ; account_v=1; _ym_uid=170258597425757114; _ym_d=1702585974; _ym_isad=1; _ym_visorc=b; AB_DATA_TRACK=472051_617389.455637_622998; AB_ALG=global_union_ab_exp_4%3D2; AB_STG=st_StrategyExp_1694492533501%23stg_687%2Cst_StrategyExp_1695711618618%23stg_685; af_ss_a=1; af_ss_b=1; aep_history=keywords%5E%0Akeywords%09%0A%0Aproduct_selloffer%5E%0Aproduct_selloffer%091005005943671094; intl_locale=ar_MA; XSRF-TOKEN=f90e5229-8dc7-4bd7-a5e3-f03fa9541960; RT=\"z=1&dm=aliexpress.com&si=cf719887-f5c6-49cc-9e93-09699f7761ed&ss=lq5nq879&sl=2&tt=3lo&rl=1&obo=1&ld=2tuk&r=1esw5xemv&ul=2tuk&hd=2ujp\"; havana_tgc=NTGC_4af064990ad42b76e65b44deb0d4128c; _hvn_login=13; x_router_us_f=x_alimid=2720217087; xman_us_t=x_lid=dz1119513087freae&sign=y&rmb_pp=louktila.tk@gmail.com&x_user=FsvZqhzjyC9N9r8UfDqcE8ih7ZaPp9x036ieR7TlWMU=&ctoken=1457kqo8xl7w6&l_source=aliexpress; sgcookie=E100e+PgE32vvuBs4RRbDK1/zcDuOBbY237w+8jCee44/xRljlTdh9V7S7XjXrXg7XrMIcKRzLdmDBiY3MwCpgdUie3P/u9LPMTBVfMa1zCbh8I=; aep_common_f=M+l0+zh1HyHwhuSym0X5YTLkksVK+YKNYp/kuSyps1g4xwkHRoCd3w==; xman_f=1mXsCY+Xl+n3EYdOjIl0/gBLz2Hiqv5U8ewzhAivdy/AiLbLiHXPyLLTUKdWdMYzg3lYH2BIL0DQ3NtqsS/hVyDAb328KQ048sO8Entkv/90t50Tj0cG8IkWwRMvsCUeGick5+SuChArwIW+W2AzmtdYlpJQPoQGPV/nMpT7z02qYZM6bDNYtdpO+Z43PWnoV2sR12ssnkw7bI/2SVT7K6WPLFQxoTNhr6cbX7hBDigFiSsD+R4L7bMADU18JjIa5zhoMfBKoVzUFbh2kyrMn/FbQaXidluAwS6jFit8l/Sq5zd4jsFQzTmkzL1Z1eWXq5h+Zv03q1iMa/MPUTEnfv4j0wdMAK3bP0GVdfdBQC/v+wGV+kkJSAPxRyWe1mlYpMsmcKsvlur4X5w7Ta0GBQ5L3PhEdXfhpCY5f30wBQVlDvBvNG+bZyhhE4fAXhmycQ91+vWfAN0xnFVzQunDxA==; aep_usuc_f=site=ara&province=null&city=null&c_tp=USD&x_alimid=2720217087&isb=y&region=DZ&b_locale=ar_MA; ali_apache_track=mt=1|ms=|mid=dz1119513087freae; ali_apache_tracktmp=W_signed=Y; xman_us_f=x_locale=ar_MA&x_l=0&x_user=DZ|hacking|baka|ifm|2720217087&x_lid=dz1119513087freae&x_c_chg=0&acs_rt=485dca3186c64e8eb354206aba5405ac; _gat=1; JSESSIONID=DA1BE1F197FF4F063B97905DBBC9B65F; intl_common_forever=o0NI+d3m22lDNIOpetIWYrPDmaEuTFX4k4J6EKg8n5Ho6+TAmNc8mA==; xman_t=rfJ6i7unnKWyVhPN9Bz+YeUZJbWDcqLG5/oQ5LlvC6swKPUopd5rffHDjw9J0iI5VNxH7lB7S+hTBUaUe/0KVszcCLs8U/vEbVyTNAoqcfJoLFgB/Jp66IHIe+dX1H9DjoXr9IIdp/4mB1S+j/fVPbqmawcBpAujEPY3yUMl0x5+Yh/vAaKLCsAjnT2mf/8xlx/QJU4TFjlnBpIK+huny8o/cItt6JaEn9n4GnMyeY03YgmWKuLUwR4GL9ut1vKYcB2i75S6nruLzfnn9OuMR4Fn/eFHkhnGAG86CbF4VWCbrvJkj1Kp6r5U/R33856wKg4SPUrDTzc35DmZSORxn4OPq3i++b4Sf4nSD83uNh1oH7uohhdGC0JdbYsT88nJZAJBDEZ8aDRznGLcMUhRnXHewEgoRovgnMYQjlL3pvxk5WBZN+CQsKWVPOWUq+lb+FycZpzNhs0kU0G/q8WvWomhb7L0sc9BGk9fiyfHViBfJTyaa9BrDr/gyhDc9A1u08akHsGgpzfx7Z40yqLxGqer1UHLhj3NhtFgsO2MelsHeZLpzal9r6iZp2WAp8B7r12atKjxwqJEZz7ik33Hhp32U+2AZ5gz68Jn/5pKbaPbvvBox/Vi+MAFMascZ4lO6BrKFptyl3g83B89+pyBVPNE5a9QgmPrUEkmMxbxicGlqDwZxPlsVdF5ntaeVNVDBaXBWYlFv32GW9zLSFCWCeUaqcl0XcfYR7GTOjBhubfaqRXsv10/bMoCGgdXR1Vo; tfstk=e_427FYM-ZQ2RrOQ000Z85gZa23x-2BBSPMss5ViGxDcDcZr78e4cdgsfFkgsYajhSgc7f2QUxcmSVYuZfheiFDmsL0o6j8ijPM_71uYPoTsht3asJgNd9_CRSFxyVXCdKgJMwuTMF97WwNYMQ4VbySFRFWgHiShDbjWiEnGKWHurvZPEnj8GY8M7LhqmvbKUFYgzjPrKSjpSF4rgmIP8dhuDWUT0dxZmbhrd_5rLhogMKuY4k-9X00Kav1jGhKtmbhrd_5yXhnoebkCGj1..; l=fBIaWgPRPcvgi6lsBOfwPurza77OSIRAguPzaNbMi9fPOD5w5MmRB1UinYLeC3MNFsQvR3S3hc2kBeYBqQAonxvOw1MjP4Mmnttb57C..; isg=BF1db82O5Idjx4Cr6aHSjiL2bDlXepHMSVD95B8imbTj1n0I58qhnCtEANJQFqmE; _ga_VED1YSGNC7=GS1.1.1702585971.1.1.1702586521.14.0.0; _ga=GA1.1.885247232.1702585970; cto_bundle=irfJol9oQ1RMb080OXRmSyUyQkFnNGNHUGpJN0hQMzA3TnVXRjY3Um5BSlo1MFNPZGhteDYyUFQlMkZRMEU4Z0FsUzM3VCUyRjhxMFhTQ1FBYTBOMVJKSyUyQmMlMkZWR3pUSGZ3c25LT3pVcmR3NngwckhNUGc3Y3Y1a0JSY2ozVm1zenclMkJpNXB4OEs4Qg"
+      } else {
+        return "ali_apache_id=33.3.20.111.1702585962650.678888.4; acs_usuc_t=x_csrf=8nx8qrep9exs&acs_rt=485dca3186c64e8eb354206aba5405ac; AKA_A2=A; _m_h5_tk=10ba1bb6aecdb672824f066d0c526c8e_1702587856981; _m_h5_tk_enc=7750008d64513183ab439d261cee7b17; e_id=pt70; xlly_s=1; _gid=GA1.2.2136155133.1702585970; _gcl_au=1.1.1695213607.1702585971; cna=c1QCHmBmNB0CAYEteA6D0PDJ; account_v=1; _ym_uid=170258597425757114; _ym_d=1702585974; _ym_isad=1; _ym_visorc=b; AB_DATA_TRACK=472051_617389.455637_622998; AB_ALG=global_union_ab_exp_4%3D2; AB_STG=st_StrategyExp_1694492533501%23stg_687%2Cst_StrategyExp_1695711618618%23stg_685; af_ss_a=1; af_ss_b=1; aep_history=keywords%5E%0Akeywords%09%0A%0Aproduct_selloffer%5E%0Aproduct_selloffer%091005005943671094; intl_locale=ar_MA; XSRF-TOKEN=f90e5229-8dc7-4bd7-a5e3-f03fa9541960; RT=\"z=1&dm=aliexpress.com&si=cf719887-f5c6-49cc-9e93-09699f7761ed&ss=lq5nq879&sl=2&tt=3lo&rl=1&obo=1&ld=2tuk&r=1esw5xemv&ul=2tuk&hd=2ujp\"; havana_tgc=NTGC_4af064990ad42b76e65b44deb0d4128c; _hvn_login=13; x_router_us_f=x_alimid=2720217087; xman_us_t=x_lid=dz1119513087freae&sign=y&rmb_pp=louktila.tk@gmail.com&x_user=FsvZqhzjyC9N9r8UfDqcE8ih7ZaPp9x036ieR7TlWMU=&ctoken=1457kqo8xl7w6&l_source=aliexpress; sgcookie=E100e+PgE32vvuBs4RRbDK1/zcDuOBbY237w+8jCee44/xRljlTdh9V7S7XjXrXg7XrMIcKRzLdmDBiY3MwCpgdUie3P/u9LPMTBVfMa1zCbh8I=; aep_common_f=M+l0+zh1HyHwhuSym0X5YTLkksVK+YKNYp/kuSyps1g4xwkHRoCd3w==; xman_f=1mXsCY+Xl+n3EYdOjIl0/gBLz2Hiqv5U8ewzhAivdy/AiLbLiHXPyLLTUKdWdMYzg3lYH2BIL0DQ3NtqsS/hVyDAb328KQ048sO8Entkv/90t50Tj0cG8IkWwRMvsCUeGick5+SuChArwIW+W2AzmtdYlpJQPoQGPV/nMpT7z02qYZM6bDNYtdpO+Z43PWnoV2sR12ssnkw7bI/2SVT7K6WPLFQxoTNhr6cbX7hBDigFiSsD+R4L7bMADU18JjIa5zhoMfBKoVzUFbh2kyrMn/FbQaXidluAwS6jFit8l/Sq5zd4jsFQzTmkzL1Z1eWXq5h+Zv03q1iMa/MPUTEnfv4j0wdMAK3bP0GVdfdBQC/v+wGV+kkJSAPxRyWe1mlYpMsmcKsvlur4X5w7Ta0GBQ5L3PhEdXfhpCY5f30wBQVlDvBvNG+bZyhhE4fAXhmycQ91+vWfAN0xnFVzQunDxA==; ali_apache_track=mt=1|ms=|mid=dz1119513087freae; ali_apache_tracktmp=W_signed=Y; cto_bundle=mS_5yF9oQ1RMb080OXRmSyUyQkFnNGNHUGpJN0hFV3RKREQxTlNIJTJCOUFjJTJCdXFQc2NqM1JpMlp6cHk3ajNmNlFvdUN4WEZING9WY3J2ZUhqNkJHTW92N1hpZGhyaVV2aXBSRWdNJTJCaXlxMSUyRllNenU4aTlHeklwUVIyS3ZYQkVrbGklMkZYVHBuVg; _ga=GA1.1.885247232.1702585970; aep_usuc_f=site=ara&province=null&city=null&c_tp=USD&x_alimid=2720217087&isb=y&region=MA&b_locale=ar_MA; xman_us_f=x_locale=ar_MA&x_l=0&x_user=DZ|hacking|baka|ifm|2720217087&x_lid=dz1119513087freae&x_c_chg=0&acs_rt=485dca3186c64e8eb354206aba5405ac; _ga_VED1YSGNC7=GS1.1.1702585971.1.1.1702586719.1.0.0; JSESSIONID=231040B7F0CFC0E8CFD541DA976BA7F9; intl_common_forever=b3gBP7EcaZRx0S/H9Z0+jBIeSwIkXJ744jFOaU59XeQyra04VnWtZQ==; xman_t=E2mVTpC27TZSuF+BN4q4bDnEPi+M9urlBGmGFNqF5/lPkQVJ7P+kLwKO3vMjMtD5FtE0z27PJ5AWVu9wTXn9B28aZX6FKZRsubgYtTCDulP7ajH1tTtEy2ux3UJ982WM35jgaZjLDc0AHDVOazRvptcMgn9Axvhs7rNRWb8dPCBcyxtZi0jCrZesbGUxhu4A7h/IgZ7/OKvX7zDL68MlBDVzLwZa9WMe/F8UHNfMSQuV0HsV7Gw2MPp63m7Ab7s0STQZ092xUHC8o+IJ0pjDYv3HFhipwp/jyerj/g6mRg0shWI6I6km5w/rTsSXifxJkf5ILpfbB2fqM+tUs+jBaH/YvWldzz6c6xu5BZLmGn/EblZWbUfGFlDSZZKfDxVxUJYnMvRasw5/6Uz1DZnM0Qz9422w1hQ4GDaNhu9AW6QEJGEWCd/K3p5rgCny+rAb7QabSY0ldKu2s+W++apqChDom8xqKov1AN3XENnmNhGezL3rF7HJaqBlaUoQkrRzXM8XhdmVdOUUaH1hV6ybVugABNDc4/ZVgqD0pnnywdCwqH4I2Kb21auDOOjp0Vdtv66HMhq8SRL+XNgG61QBtRcPUZlWM+soPuLD139is2Vekp1a9M2L+u0TBvQSAuTABWaJMgZtRouV1PlmRJOWOkbr7UHaRHtCmOt4/YnKF9z7bGfRwoEoXkNcFy3NDSO+6YEVO0S8vA1R3gr0K+rYYD/VfrqBXpwJ+jTqSOXEbauR92T5/VyO1J0itwLiQm+5; tfstk=eNe270vMKtB2d-tQgbDZLlgN39MxCvQBIRgsjlqicq0cMfNrQzU4GFMs1dugj4wjloMcQc4QzqmmIAvuqcnemd0mjUDoXmJisRg_QGkYFS9slZHajyMNRw6CdoExeAbCRPlyFzHTDdT7B9ZYD3V8j5rAdd7glOSnNA7ei3hP-k3uE2NqRdbLq4JMQUnqi2XKzdvgUmrr-ofpId2r0jIz8FnuMkeTgFAZi0nrRgSr8ClgDEkYaWR96bDK42sjcCdti0nrRgSy6Choy0uCcm1..; l=fBIaWgPRPcvgipttBOfwPurza77OSIRAguPzaNbMi9fP9sCp5juAB1Ui3XL9C3MNF6kMR3S3hc2kBeYBqIvnQ61Gw1MjP4Mmn_vWSGf..; isg=BMTEsE9KfcwzcMmA6CbbFXOJlUK23ehHeP90z95lUA9SCWTTBu241_qrSbnRESCf"
+      }
+    }
     const headers = {
-      "cookie": `xman_f=xqfzYoJKcG4wBVaigDy/gBwOqZUCvLlUXTHqo3mKJly7Wmx+xLy2DezaMxUF2mT6ZzRAdutEElIbpP8i6eHimxSl+4z2+mJY0naPzYFgXpIR6kp23kdzvTKNBR7RnKNxpsnNdI8ifMlpKPBDwSQhGkOQAUaVo0RcnygDa4rilD/g2mYQ9WKVxb5wC26yh3pBvXsMEO2kbeKk3oUG5/6ExM93W5kxj2xHs7x/4CJwycehRVHKUU5C6JsYCiFv6xglcsfHNtv61iln+E1QbqBIMISkLIlGT45m29NW3gjiY0ttNlhHyOfXUDUjykW/eruUkaU8PCHiLtQaVM6pRCbXqv19v9W99qsVZ4CnOalQ8c5sDRBj1CQgg0A9buGTHfE6QW8mlDC9W79BYioM3yGBJRF7Z1jtr4QW; xman_t=Le0GPnIrn0+aOAtC69GXG8SSc/WTeBMiJ4rQVDdOo1Ogm14Kd9PCAKFJAtkVuIa1vCClcZXeQ4S3z8C+BsNh8yzwvjj1Gc6YnJ0XZLUxhXk1RoJWTp0RxuMRBMJII8ujnDrVn9MkI96LHwp0l8/HsLpNgKiaYPSzeinzUggyyk4Fw5u6/CUQ18rBwhZcWebDvy7+jpt5FskYgKZjQct6WDc+yJquJlm33T3cWr5hukXLYvTKYupxWasaiwdG/sKlHaDjI6dFlzGzBen+NHGQjbalF0hCXzlX0QGlRF5gKh8f0fOgVYK2gXpNaDwUWQVR9F9nZh4cEjbQtba3aEd6cjC1jWL68Svt5khc2PosJEdIBk+8BKh7Lte898Y2gcu5KUNn4n5+RBpQNyCJUAoDujwbJ+NxwmrKToTZ0gHjsPowcdBGh/cj2/bHmSeuVGbx+xwZ82Puuba69oqbn5E1wvRcjk/MAE4i+vINHCFzUPl7cmGG1RHd4jvAJ6c0BqGXOhpP4TJLIiRphOXcAClQGXt498b7BkzMYvlSY73BrUXg94rJiz55dNx1rb8rXPpD+/PemjlgKDtV9BENrNkHigh7+yGYEN3lo5YAjAZinVlfHRi0Ojngq0arK3h9/gvVvZWydmMlqloSB5Kze6NEmyqTSOHK/Yd3Tc9QhDD2sdgLN2pdC1DuO8qWg0JXqpfwVaX7psexHArKM5Vb6n42/EDxN9hUwNSAUbhQCVJl9ygyzZiuKCQPR3eKqAZcp1pz; aep_usuc_f=site=vnm&province=null&city=null&c_tp=USD&x_alimid=2720217087&ups_d=1|1|1|1&re_sns=google&isb=y&ups_u_t=1715367049691&region=${region}&b_locale=en_US&ae_u_p_s=2`
+      "cookie": cookier()
     };
     try {
         const result = {};
@@ -204,7 +211,7 @@ app.get('/fetch', async (req, res) => {
 app.get('/detail', async (req, res) => {
   const { id } = req.query;
   const headers = {
-    "cookie": "xman_f=xqfzYoJKcG4wBVaigDy/gBwOqZUCvLlUXTHqo3mKJly7Wmx+xLy2DezaMxUF2mT6ZzRAdutEElIbpP8i6eHimxSl+4z2+mJY0naPzYFgXpIR6kp23kdzvTKNBR7RnKNxpsnNdI8ifMlpKPBDwSQhGkOQAUaVo0RcnygDa4rilD/g2mYQ9WKVxb5wC26yh3pBvXsMEO2kbeKk3oUG5/6ExM93W5kxj2xHs7x/4CJwycehRVHKUU5C6JsYCiFv6xglcsfHNtv61iln+E1QbqBIMISkLIlGT45m29NW3gjiY0ttNlhHyOfXUDUjykW/eruUkaU8PCHiLtQaVM6pRCbXqv19v9W99qsVZ4CnOalQ8c5sDRBj1CQgg0A9buGTHfE6QW8mlDC9W79BYioM3yGBJRF7Z1jtr4QW; xman_t=Le0GPnIrn0+aOAtC69GXG8SSc/WTeBMiJ4rQVDdOo1Ogm14Kd9PCAKFJAtkVuIa1vCClcZXeQ4S3z8C+BsNh8yzwvjj1Gc6YnJ0XZLUxhXk1RoJWTp0RxuMRBMJII8ujnDrVn9MkI96LHwp0l8/HsLpNgKiaYPSzeinzUggyyk4Fw5u6/CUQ18rBwhZcWebDvy7+jpt5FskYgKZjQct6WDc+yJquJlm33T3cWr5hukXLYvTKYupxWasaiwdG/sKlHaDjI6dFlzGzBen+NHGQjbalF0hCXzlX0QGlRF5gKh8f0fOgVYK2gXpNaDwUWQVR9F9nZh4cEjbQtba3aEd6cjC1jWL68Svt5khc2PosJEdIBk+8BKh7Lte898Y2gcu5KUNn4n5+RBpQNyCJUAoDujwbJ+NxwmrKToTZ0gHjsPowcdBGh/cj2/bHmSeuVGbx+xwZ82Puuba69oqbn5E1wvRcjk/MAE4i+vINHCFzUPl7cmGG1RHd4jvAJ6c0BqGXOhpP4TJLIiRphOXcAClQGXt498b7BkzMYvlSY73BrUXg94rJiz55dNx1rb8rXPpD+/PemjlgKDtV9BENrNkHigh7+yGYEN3lo5YAjAZinVlfHRi0Ojngq0arK3h9/gvVvZWydmMlqloSB5Kze6NEmyqTSOHK/Yd3Tc9QhDD2sdgLN2pdC1DuO8qWg0JXqpfwVaX7psexHArKM5Vb6n42/EDxN9hUwNSAUbhQCVJl9ygyzZiuKCQPR3eKqAZcp1pz; aep_usuc_f=site=vnm&province=null&city=null&c_tp=USD&x_alimid=2720217087&ups_d=1|1|1|1&re_sns=google&isb=y&ups_u_t=1715367049691&region=DZ&b_locale=en_US&ae_u_p_s=2"
+    "cookie": "ali_apache_id=33.3.20.111.1702585962650.678888.4; acs_usuc_t=x_csrf=8nx8qrep9exs&acs_rt=485dca3186c64e8eb354206aba5405ac; AKA_A2=A; _m_h5_tk=10ba1bb6aecdb672824f066d0c526c8e_1702587856981; _m_h5_tk_enc=7750008d64513183ab439d261cee7b17; e_id=pt70; xlly_s=1; _gid=GA1.2.2136155133.1702585970; _gcl_au=1.1.1695213607.1702585971; cna=c1QCHmBmNB0CAYEteA6D0PDJ; account_v=1; _ym_uid=170258597425757114; _ym_d=1702585974; _ym_isad=1; _ym_visorc=b; AB_DATA_TRACK=472051_617389.455637_622998; AB_ALG=global_union_ab_exp_4%3D2; AB_STG=st_StrategyExp_1694492533501%23stg_687%2Cst_StrategyExp_1695711618618%23stg_685; af_ss_a=1; af_ss_b=1; aep_history=keywords%5E%0Akeywords%09%0A%0Aproduct_selloffer%5E%0Aproduct_selloffer%091005005943671094; intl_locale=ar_MA; XSRF-TOKEN=f90e5229-8dc7-4bd7-a5e3-f03fa9541960; RT=\"z=1&dm=aliexpress.com&si=cf719887-f5c6-49cc-9e93-09699f7761ed&ss=lq5nq879&sl=2&tt=3lo&rl=1&obo=1&ld=2tuk&r=1esw5xemv&ul=2tuk&hd=2ujp\"; havana_tgc=NTGC_4af064990ad42b76e65b44deb0d4128c; _hvn_login=13; x_router_us_f=x_alimid=2720217087; xman_us_t=x_lid=dz1119513087freae&sign=y&rmb_pp=louktila.tk@gmail.com&x_user=FsvZqhzjyC9N9r8UfDqcE8ih7ZaPp9x036ieR7TlWMU=&ctoken=1457kqo8xl7w6&l_source=aliexpress; sgcookie=E100e+PgE32vvuBs4RRbDK1/zcDuOBbY237w+8jCee44/xRljlTdh9V7S7XjXrXg7XrMIcKRzLdmDBiY3MwCpgdUie3P/u9LPMTBVfMa1zCbh8I=; aep_common_f=M+l0+zh1HyHwhuSym0X5YTLkksVK+YKNYp/kuSyps1g4xwkHRoCd3w==; xman_f=1mXsCY+Xl+n3EYdOjIl0/gBLz2Hiqv5U8ewzhAivdy/AiLbLiHXPyLLTUKdWdMYzg3lYH2BIL0DQ3NtqsS/hVyDAb328KQ048sO8Entkv/90t50Tj0cG8IkWwRMvsCUeGick5+SuChArwIW+W2AzmtdYlpJQPoQGPV/nMpT7z02qYZM6bDNYtdpO+Z43PWnoV2sR12ssnkw7bI/2SVT7K6WPLFQxoTNhr6cbX7hBDigFiSsD+R4L7bMADU18JjIa5zhoMfBKoVzUFbh2kyrMn/FbQaXidluAwS6jFit8l/Sq5zd4jsFQzTmkzL1Z1eWXq5h+Zv03q1iMa/MPUTEnfv4j0wdMAK3bP0GVdfdBQC/v+wGV+kkJSAPxRyWe1mlYpMsmcKsvlur4X5w7Ta0GBQ5L3PhEdXfhpCY5f30wBQVlDvBvNG+bZyhhE4fAXhmycQ91+vWfAN0xnFVzQunDxA==; aep_usuc_f=site=ara&province=null&city=null&c_tp=USD&x_alimid=2720217087&isb=y&region=DZ&b_locale=ar_MA; ali_apache_track=mt=1|ms=|mid=dz1119513087freae; ali_apache_tracktmp=W_signed=Y; xman_us_f=x_locale=ar_MA&x_l=0&x_user=DZ|hacking|baka|ifm|2720217087&x_lid=dz1119513087freae&x_c_chg=0&acs_rt=485dca3186c64e8eb354206aba5405ac; _gat=1; JSESSIONID=DA1BE1F197FF4F063B97905DBBC9B65F; intl_common_forever=o0NI+d3m22lDNIOpetIWYrPDmaEuTFX4k4J6EKg8n5Ho6+TAmNc8mA==; xman_t=rfJ6i7unnKWyVhPN9Bz+YeUZJbWDcqLG5/oQ5LlvC6swKPUopd5rffHDjw9J0iI5VNxH7lB7S+hTBUaUe/0KVszcCLs8U/vEbVyTNAoqcfJoLFgB/Jp66IHIe+dX1H9DjoXr9IIdp/4mB1S+j/fVPbqmawcBpAujEPY3yUMl0x5+Yh/vAaKLCsAjnT2mf/8xlx/QJU4TFjlnBpIK+huny8o/cItt6JaEn9n4GnMyeY03YgmWKuLUwR4GL9ut1vKYcB2i75S6nruLzfnn9OuMR4Fn/eFHkhnGAG86CbF4VWCbrvJkj1Kp6r5U/R33856wKg4SPUrDTzc35DmZSORxn4OPq3i++b4Sf4nSD83uNh1oH7uohhdGC0JdbYsT88nJZAJBDEZ8aDRznGLcMUhRnXHewEgoRovgnMYQjlL3pvxk5WBZN+CQsKWVPOWUq+lb+FycZpzNhs0kU0G/q8WvWomhb7L0sc9BGk9fiyfHViBfJTyaa9BrDr/gyhDc9A1u08akHsGgpzfx7Z40yqLxGqer1UHLhj3NhtFgsO2MelsHeZLpzal9r6iZp2WAp8B7r12atKjxwqJEZz7ik33Hhp32U+2AZ5gz68Jn/5pKbaPbvvBox/Vi+MAFMascZ4lO6BrKFptyl3g83B89+pyBVPNE5a9QgmPrUEkmMxbxicGlqDwZxPlsVdF5ntaeVNVDBaXBWYlFv32GW9zLSFCWCeUaqcl0XcfYR7GTOjBhubfaqRXsv10/bMoCGgdXR1Vo; tfstk=e_427FYM-ZQ2RrOQ000Z85gZa23x-2BBSPMss5ViGxDcDcZr78e4cdgsfFkgsYajhSgc7f2QUxcmSVYuZfheiFDmsL0o6j8ijPM_71uYPoTsht3asJgNd9_CRSFxyVXCdKgJMwuTMF97WwNYMQ4VbySFRFWgHiShDbjWiEnGKWHurvZPEnj8GY8M7LhqmvbKUFYgzjPrKSjpSF4rgmIP8dhuDWUT0dxZmbhrd_5rLhogMKuY4k-9X00Kav1jGhKtmbhrd_5yXhnoebkCGj1..; l=fBIaWgPRPcvgi6lsBOfwPurza77OSIRAguPzaNbMi9fPOD5w5MmRB1UinYLeC3MNFsQvR3S3hc2kBeYBqQAonxvOw1MjP4Mmnttb57C..; isg=BF1db82O5Idjx4Cr6aHSjiL2bDlXepHMSVD95B8imbTj1n0I58qhnCtEANJQFqmE; _ga_VED1YSGNC7=GS1.1.1702585971.1.1.1702586521.14.0.0; _ga=GA1.1.885247232.1702585970; cto_bundle=irfJol9oQ1RMb080OXRmSyUyQkFnNGNHUGpJN0hQMzA3TnVXRjY3Um5BSlo1MFNPZGhteDYyUFQlMkZRMEU4Z0FsUzM3VCUyRjhxMFhTQ1FBYTBOMVJKSyUyQmMlMkZWR3pUSGZ3c25LT3pVcmR3NngwckhNUGc3Y3Y1a0JSY2ozVm1zenclMkJpNXB4OEs4Qg"
   };
   try {
     const idCatcher = async (id) => {
@@ -256,6 +263,16 @@ app.get('/detail', async (req, res) => {
               }
           };
 
+          var shippingInfo = () => {
+            var info = {
+              type: prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.deliveryProviderName,
+              source: prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.shipFromCode,
+              deliverDate: prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.deliveryDate,
+              deliverRange: `${prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.deliveryDayMin}-${prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.guaranteedDeliveryTime}`
+            };
+            return info;
+          };
+
           var discount = () => {
             if (prsd.data.priceComponent.coinDiscountText == undefined) {
                 return "لا يوجد خصم إضافي ❎"
@@ -264,64 +281,67 @@ app.get('/detail', async (req, res) => {
             }
           };
 
-          /*
-          var variants = () => {
-            const skuls = [];
+          const variants = () => {
             const skuArray = JSON.parse(prsd.data.priceComponent.skuJson);
-            if (prsd.data.skuComponent.hasSkuProperty == true) {
-              for(const skul of prsd.data.skuComponent.productSKUPropertyList[0].skuPropertyValues) {
-                var content = {
-                  id: skul.propertyValueIdLong,
-                  name: skul.propertyValueDefinitionName,
-                  image: skul.skuPropertyImagePath,
-                  miniImage: skul.skuPropertyImageSummPath,
-                  propName: skul.propertyValueName,
-                  colorCode: skul.skuColorValue,
-                };
-                skuls.push(content)
-              }
-              const linkedData = skuls.map(variant => {
-                const matchedSku = skuArray.find(sku => {
-                  // Modify the comparison based on your data structure
-                  return parseInt(variant.id) === parseInt(sku.skuPropIds);
-                });
-              
-                if (matchedSku) {
-                  return {
-                    ...variant,
-                    price: matchedSku.skuVal.skuActivityAmount.value,
-                    oldPrice: matchedSku.skuVal.skuAmount.value,
-                    discount: matchedSku.skuVal.discountTips,
-                    available: matchedSku.salable,
-                  };
-                }
-              
-                return variant;
-              });
+            const resultArray = [];
+          
+            if (prsd.data.skuComponent.hasSkuProperty) {
 
-              return linkedData;
-            } else {
-              return "none"
+              let shippingPropertyId = null;
+              const SKUPropertyList = [];
+          
+              prsd.data.skuComponent.productSKUPropertyList.forEach((property) => {
+                if (property.skuPropertyId == 200007763) { // shipping sku
+                  if (property.skuPropertyValues.length == 1) {
+                    shippingPropertyId = property.skuPropertyValues[0].propertyValueId;
+                  } else {
+                    const matchingValue = property.skuPropertyValues.find((value) => value.skuPropertySendGoodsCountryCode == shippingInfo().source);
+                    if (matchingValue) {
+                      shippingPropertyId = matchingValue.propertyValueIdLong;
+                    }
+                  }
+                } else {
+                  SKUPropertyList.push(property);
+                }
+              });
+          
+              if (shippingPropertyId != null) {
+                skuArray.forEach((sku) => {
+                  if (sku.skuPropIds.includes(shippingPropertyId)) { resultArray.push(sku); }
+                });
+                const mappedResultArray = resultArray.map((result) => { return { attr: result.skuAttr, id: result.skuId, idStr: result.skuIdStr, linked: result.skuPropIds, available: result.skuVal.availQuantity, price: result.skuVal.skuActivityAmount != undefined && result.skuVal.skuActivityAmount.value || result.skuVal.skuAmount.value, oldPrice: result.skuVal.skuAmount.value }; });
+                return { propinfo: mappedResultArray, props: SKUPropertyList[0].skuPropertyValues };
+              } else {
+                const mappedskuArray = skuArray.map((result) => { return { attr: result.skuAttr, id: result.skuId, idStr: result.skuIdStr, linked: result.skuPropIds, available: result.skuVal.availQuantity, price: result.skuVal.skuActivityAmount != undefined && result.skuVal.skuActivityAmount.value || result.skuVal.skuAmount.value, oldPrice: result.skuVal.skuAmount.value }; });
+                return { propinfo: mappedskuArray, props : SKUPropertyList[0].skuPropertyValues };
+              }
             }
+          
+            return "No SKU property available";
           };
-          */
+          
+          
+          
+
+
           var shaped = {
               name: prsd.data.metaDataComponent.title.replace("| |   - AliExpress", ""),
               cover: prsd.data.imageComponent.imagePathList[0],
               shipping: shipping(),
+              shippingInfo: shippingInfo(),
               rate: prsd.data.feedbackComponent.evarageStar,
               totalRates: prsd.data.feedbackComponent.totalValidNum,
               price: prsd.data.priceComponent.origPrice.minAmount.value,
               discountPrice: prsd.data.priceComponent.discountPrice.minActivityAmount != undefined && prsd.data.priceComponent.discountPrice.minActivityAmount.value || "No discount Price",
               sales: prsd.data.tradeComponent.formatTradeCount,
               discount: discount(),
-              //variants: variants(),
+              variants: variants(),
               store: prsd.data.sellerComponent.storeName,
               storeRate: prsd.data.storeFeedbackComponent.sellerPositiveRate
           };
           //result['normal'] = shaped;
-          //const skuArray = JSON.parse(prsd.data.priceComponent.skuJson);
-          //const skuImagesArray = prsd.data.skuComponent;
+          const skuArray = JSON.parse(prsd.data.priceComponent.skuJson);
+          const skuImagesArray = prsd.data.skuComponent;
 
           // shipFromCode // webGeneralFreightCalculateComponent
 
