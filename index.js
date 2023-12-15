@@ -307,11 +307,11 @@ app.get('/detail', async (req, res) => {
                 skuArray.forEach((sku) => {
                   if (sku.skuPropIds.includes(shippingPropertyId)) { resultArray.push(sku); }
                 });
-                const mappedResultArray = resultArray.map((result) => { return { attr: result.skuAttr, id: result.skuId, idStr: result.skuIdStr, linked: result.skuPropIds, available: result.skuVal.availQuantity, price: result.skuVal.skuActivityAmount != undefined && result.skuVal.skuActivityAmount.value || result.skuVal.skuAmount.value, oldPrice: result.skuVal.skuAmount.value }; });
-                return { propinfo: mappedResultArray, props: SKUPropertyList };
+                const mappedResultArray = resultArray.map((result) => { return { attr: result.skuAttr.replace(/[^0-9:;]/g, ''), id: result.skuId, idStr: result.skuIdStr, linked: result.skuPropIds, available: result.skuVal.availQuantity, price: result.skuVal.skuActivityAmount != undefined && result.skuVal.skuActivityAmount.value || result.skuVal.skuAmount.value, oldPrice: result.skuVal.skuAmount.value }; });
+                return { defAttr: prsd.data.skuComponent.selectedSkuAttr.replace(/[^0-9:;]/g, ''), shippingid: `200007763:${shippingPropertyId}`, propinfo: mappedResultArray, props: SKUPropertyList  };
               } else {
-                const mappedskuArray = skuArray.map((result) => { return { attr: result.skuAttr, id: result.skuId, idStr: result.skuIdStr, linked: result.skuPropIds, available: result.skuVal.availQuantity, price: result.skuVal.skuActivityAmount != undefined && result.skuVal.skuActivityAmount.value || result.skuVal.skuAmount.value, oldPrice: result.skuVal.skuAmount.value }; });
-                return { propinfo: mappedskuArray, props : SKUPropertyList };
+                const mappedskuArray = skuArray.map((result) => { return { attr: result.skuAttr.replace(/[^0-9:;]/g, ''), id: result.skuId, idStr: result.skuIdStr, linked: result.skuPropIds, available: result.skuVal.availQuantity, price: result.skuVal.skuActivityAmount != undefined && result.skuVal.skuActivityAmount.value || result.skuVal.skuAmount.value, oldPrice: result.skuVal.skuAmount.value }; });
+                return { defAttr: prsd.data.skuComponent.selectedSkuAttr.replace(/[^0-9:;]/g, ''), shippingid: "Auto", propinfo: mappedskuArray, props : SKUPropertyList };
               }
             }
           
