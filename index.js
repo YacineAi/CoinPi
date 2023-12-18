@@ -216,25 +216,29 @@ app.get('/detail', async (req, res) => {
       if (/^\d+$/.test(id)) {
         return id;
       } else if (id.includes("aliexpress.com")) {
-        try {
-          const response = await axios.head(id, { maxRedirects: 0, validateStatus: (status) => status >= 200 && status < 400 });
-          const decodedUrl = decodeURIComponent(response.headers.location);
-          const regex = /\/(\d+)\.html/;
-          const match = decodedUrl.match(regex);
-          if (match && match[1]) {
-            return match[1];
-          } else if (decodedUrl.includes('/item/')) {
-            // Handle the additional AliExpress URL pattern directly
-            const regexItem = /\/(\d+)\.html/;
-            const matchItem = decodedUrl.match(regexItem);
-            if (matchItem && matchItem[1]) {
-              return matchItem[1];
+        if (/^\d+$/.test(id.match(/\/(\d+)\.html/)[1])) {
+          return id.match(/\/(\d+)\.html/)[1];
+        } else {
+          try {
+            const response = await axios.head(id, { maxRedirects: 0, validateStatus: (status) => status >= 200 && status < 400 });
+            const decodedUrl = decodeURIComponent(response.headers.location);
+            const regex = /\/(\d+)\.html/;
+            const match = decodedUrl.match(regex);
+            if (match && match[1]) {
+              return match[1];
+            } else if (decodedUrl.includes('/item/')) {
+              // Handle the additional AliExpress URL pattern directly
+              const regexItem = /\/(\d+)\.html/;
+              const matchItem = decodedUrl.match(regexItem);
+              if (matchItem && matchItem[1]) {
+                return matchItem[1];
+              }
             }
+          } catch (error) {
+            console.error('Error occurred while fetching the URL:', error);
+            res.status(400).json({ ok: false, error: 'Invalid URL provided' });
+            return null;
           }
-        } catch (error) {
-          console.error('Error occurred while fetching the URL:', error);
-          res.status(400).json({ ok: false, error: 'Invalid URL provided' });
-          return null;
         }
       }
       console.error('Invalid ID or URL provided');
