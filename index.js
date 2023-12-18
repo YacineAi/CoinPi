@@ -48,7 +48,7 @@ app.get('/fetch', async (req, res) => {
         const normalContent = normalHtml.html();
         const normalMatch = /window\.runParams\s*=\s*({.*?});/s.exec(normalContent);
 
-        if (normalMatch && normalMatch[1]) {
+        if (normalMatch && normalMatch[1] && normalMatch[1].length > 1000) {
             const evaluatedDataString = eval(`(${normalMatch[1]})`);
             var string = JSON.stringify(evaluatedDataString);
             var prsd = JSON.parse(string);
@@ -247,8 +247,7 @@ app.get('/detail', async (req, res) => {
       const normalHtml = $('script:contains("window.runParams")');
       const normalContent = normalHtml.html();
       const normalMatch = /window\.runParams\s*=\s*({.*?});/s.exec(normalContent);
-
-      if (normalMatch && normalMatch[1]) {
+      if (normalMatch && normalMatch[1] && normalMatch[1].length > 1000) {
           const evaluatedDataString = eval(`(${normalMatch[1]})`);
           var string = JSON.stringify(evaluatedDataString);
           var prsd = JSON.parse(string);
