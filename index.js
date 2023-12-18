@@ -216,7 +216,7 @@ app.get('/detail', async (req, res) => {
       if (/^\d+$/.test(id)) {
         return id;
       } else if (id.includes("aliexpress.com")) {
-        if (/^\d+$/.test(id.match(/\/(\d+)\.html/))) {
+        if (/\/(\d+)\.html/.test(id)) {
           return id.match(/\/(\d+)\.html/)[1];
         } else {
           try {
