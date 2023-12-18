@@ -216,7 +216,7 @@ app.get('/detail', async (req, res) => {
       if (/^\d+$/.test(id)) {
         return id;
       } else if (id.includes("aliexpress.com")) {
-        if (/^\d+$/.test(id.match(/\/(\d+)\.html/)[1])) {
+        if (/^\d+$/.test(id.match(/\/(\d+)\.html/))) {
           return id.match(/\/(\d+)\.html/)[1];
         } else {
           try {
@@ -329,7 +329,6 @@ app.get('/detail', async (req, res) => {
           
           
           
-
 
           var shaped = {
               name: prsd.data.metaDataComponent.title.replace("| |   - AliExpress", ""),
