@@ -331,7 +331,7 @@ app.get('/detail', async (req, res) => {
           
 
           var shaped = {
-              name: prsd.data.metaDataComponent.title.replace(" - AliExpress", ""),
+              name: prsd.data.metaDataComponent.title.replace(" - AliExpress", "").replace("|", " "),,
               cover: prsd.data.imageComponent.imagePathList[0],
               shipping: shipping(),
               shippingInfo: shippingInfo(),
