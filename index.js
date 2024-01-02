@@ -68,8 +68,27 @@ app.get('/fetch', async (req, res) => {
               } else {
                 return prsd.data.priceComponent.coinDiscountText
               }
-            };
+          };
 
+          var coupon = () => {
+            if (prsd.data.webCouponInfoComponent.promotionPanelDTO.shopCoupon == undefined) {
+              return "لا يوجد كوبونات ❎"
+            } else {
+              let copo = []
+              for (const promotion of prsd.data.webCouponInfoComponent.promotionPanelDTO.shopCoupon) {
+                for (const coupon of promotion.promotionPanelDetailDTOList) {
+                  const content = {
+                    code: coupon.attributes.couponCode,
+                    detail: coupon.promotionDetail,
+                    desc: coupon.promotionDesc,
+                  };
+                  copo.push(content)
+                }
+              }
+              return copo
+            }
+          };
+            
             var shaped = {
                 name: prsd.data.metaDataComponent.title.replace("| |   - AliExpress", ""),
                 image: prsd.data.imageComponent.imagePathList[0],
@@ -80,6 +99,7 @@ app.get('/fetch', async (req, res) => {
                 discountPrice: prsd.data.priceComponent.discountPrice.minActivityAmount != undefined && prsd.data.priceComponent.discountPrice.minActivityAmount.formatedAmount || "No discount Price",
                 sales: prsd.data.tradeComponent.formatTradeCount,
                 discount: discount(),
+                coupon: coupon(),
                 store: prsd.data.sellerComponent.storeName,
                 storeRate: prsd.data.storeFeedbackComponent.sellerPositiveRate
             };
