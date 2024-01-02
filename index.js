@@ -363,10 +363,6 @@ app.get('/detail', async (req, res) => {
 });
 
 
-
-
-
-
 app.get('/coinz', async (req, res) => {
   const { id } = req.query;
   const headers = {
