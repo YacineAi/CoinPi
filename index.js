@@ -7,24 +7,25 @@ const https = require('https');
 app.use(express.json());
 
 app.get('/', (req, res) => {
-    res.sendStatus(200)
+  res.sendStatus(200)
 });
 
 app.get('/ping', (req, res) => {
-    res.status(200).json({ message: 'Ping successful' });
-  });
-  
+  res.status(200).json({ message: 'Ping successful' });
+});
+
+
 function keepAppRunning() {
-    setInterval(() => {
-      https.get(`${process.env.RENDER_EXTERNAL_URL}/ping`, (resp) => {
-        if (resp.statusCode === 200) {
-          console.log('Ping successful');
-        } else {
-          console.error('Ping failed');
-        }
-      });
-    }, 5 * 60 * 1000);
-  }
+  setInterval(() => {
+    https.get(`${process.env.RENDER_EXTERNAL_URL}/ping`, (resp) => {
+      if (resp.statusCode === 200) {
+        console.log('Ping successful');
+      } else {
+        console.error('Ping failed');
+      }
+    });
+  }, 5 * 60 * 1000);
+}
 
 app.get('/fetch', async (req, res) => {
   const { id } = req.query;
@@ -237,119 +238,119 @@ app.get('/detail', async (req, res) => {
       res.status(400).json({ ok: false, error: 'Invalid ID or URL provided' });
       return null;
     };
-      const finalid = await idCatcher(id);
-      const normal = await axios.get(`https://ar.aliexpress.com/item/${finalid}.html`, { headers });
-      const $ = cheerio.load(normal.data);
-      const normalHtml = $('script:contains("window.runParams")');
-      const normalContent = normalHtml.html();
-      const normalMatch = /window\.runParams\s*=\s*({.*?});/s.exec(normalContent);
-      if (normalMatch && normalMatch[1] && normalMatch[1].length > 1000) {
-          const evaluatedDataString = eval(`(${normalMatch[1]})`);
-          var string = JSON.stringify(evaluatedDataString);
-          var prsd = JSON.parse(string);
+    const finalid = await idCatcher(id);
+    const normal = await axios.get(`https://ar.aliexpress.com/item/${finalid}.html`, { headers });
+    const $ = cheerio.load(normal.data);
+    const normalHtml = $('script:contains("window.runParams")');
+    const normalContent = normalHtml.html();
+    const normalMatch = /window\.runParams\s*=\s*({.*?});/s.exec(normalContent);
+    if (normalMatch && normalMatch[1] && normalMatch[1].length > 1000) {
+      const evaluatedDataString = eval(`(${normalMatch[1]})`);
+      var string = JSON.stringify(evaluatedDataString);
+      var prsd = JSON.parse(string);
 
-          var shipping = () => {
-              if (prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.displayAmount == undefined) {
-                  return "Free Shipping"
-              } else {
-                  return prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.displayAmount
-              }
-          };
-
-          var shippingInfo = () => {
-
-            if (prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.unreachable && prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.unreachable == true) {
-              var nonDz = { dz: false };
-              return nonDz;
-            } else {
-              var info = {
-                type: prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.deliveryProviderName,
-                source: prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.shipFromCode,
-                deliverDate: prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.deliveryDate,
-                deliverRange: `${prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.deliveryDayMin}-${prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.guaranteedDeliveryTime}`
-              };
-              return info;
-            }
-          };
-
-          var discount = () => {
-            if (prsd.data.priceComponent.coinDiscountText == undefined) {
-                return "لا يوجد خصم إضافي ❎"
-            } else {
-              return prsd.data.priceComponent.coinDiscountText
-            }
-          };
-
-          const variants = () => {
-            const skuArray = JSON.parse(prsd.data.priceComponent.skuJson);
-            const resultArray = [];
-          
-            if (prsd.data.skuComponent.hasSkuProperty) {
-
-              let shippingPropertyId = null;
-              const SKUPropertyList = [];
-          
-              prsd.data.skuComponent.productSKUPropertyList.forEach((property) => {
-                if (property.skuPropertyId == 200007763) { // shipping sku
-                  if (property.skuPropertyValues.length == 1) {
-                    shippingPropertyId = property.skuPropertyValues[0].propertyValueId;
-                  } else {
-                    const matchingValue = property.skuPropertyValues.find((value) => value.skuPropertySendGoodsCountryCode == shippingInfo().source);
-                    if (matchingValue) {
-                      shippingPropertyId = matchingValue.propertyValueIdLong;
-                    }
-                  }
-                } else {
-                  SKUPropertyList.push(property);
-                }
-              });
-          
-              if (shippingPropertyId != null) {
-                skuArray.forEach((sku) => {
-                  if (sku.skuPropIds.includes(shippingPropertyId)) { resultArray.push(sku); }
-                });
-                const mappedResultArray = resultArray.map((result) => { return { attr: result.skuAttr.replace(/#[^;]+/g, match => match.replace(/[0-9]/g, '')).replace(/[^0-9:;]/g, '').replace(`;200007763:${shippingPropertyId}`, "").replace(`200007763:${shippingPropertyId};`, ""), id: result.skuId, idStr: result.skuIdStr, linked: result.skuPropIds, available: result.skuVal.availQuantity, price: result.skuVal.skuActivityAmount != undefined && result.skuVal.skuActivityAmount.value || result.skuVal.skuAmount.value, oldPrice: result.skuVal.skuAmount.value }; });
-                return { defAttr: prsd.data.skuComponent.selectedSkuAttr.replace(/#[^;]+/g, match => match.replace(/[0-9]/g, '')).replace(/[^0-9:;]/g, '').replace(`;200007763:${shippingPropertyId}`, "").replace(`200007763:${shippingPropertyId};`, ""), shippingid: `200007763:${shippingPropertyId}`, propinfo: mappedResultArray, props: SKUPropertyList  };
-              } else {
-                const mappedskuArray = skuArray.map((result) => { return { attr: result.skuAttr.replace(/#[^;]+/g, match => match.replace(/[0-9]/g, '')).replace(/[^0-9:;]/g, ''), id: result.skuId, idStr: result.skuIdStr, linked: result.skuPropIds, available: result.skuVal.availQuantity, price: result.skuVal.skuActivityAmount != undefined && result.skuVal.skuActivityAmount.value || result.skuVal.skuAmount.value, oldPrice: result.skuVal.skuAmount.value }; });
-                return { defAttr: prsd.data.skuComponent.selectedSkuAttr.replace(/#[^;]+/g, match => match.replace(/[0-9]/g, '')).replace(/[^0-9:;]/g, ''), shippingid: "Auto", propinfo: mappedskuArray, props : SKUPropertyList };
-              }
-            }
-          
-            return "No SKU property available";
-          };
-          
-          
-          
-
-          var shaped = {
-              name: prsd.data.metaDataComponent.title.replace("| |   - AliExpress", ""),
-              cover: prsd.data.imageComponent.imagePathList[0],
-              shipping: shipping(),
-              shippingInfo: shippingInfo(),
-              rate: prsd.data.feedbackComponent.evarageStar,
-              totalRates: prsd.data.feedbackComponent.totalValidNum,
-              price: prsd.data.priceComponent.origPrice.minAmount.value,
-              discountPrice: prsd.data.priceComponent.discountPrice.minActivityAmount != undefined && prsd.data.priceComponent.discountPrice.minActivityAmount.value || "No discount Price",
-              sales: prsd.data.tradeComponent.formatTradeCount,
-              discount: discount(),
-              variants: variants(),
-              store: prsd.data.sellerComponent.storeName,
-              storeRate: prsd.data.storeFeedbackComponent.sellerPositiveRate
-          };
-          //result['normal'] = shaped;
-          const skuArray = JSON.parse(prsd.data.priceComponent.skuJson);
-          const skuImagesArray = prsd.data.skuComponent;
-
-          // shipFromCode // webGeneralFreightCalculateComponent
-          
-          res.json(shaped);
+      var shipping = () => {
+        if (prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.displayAmount == undefined) {
+          return "Free Shipping"
         } else {
-          res.json({ ok : false});
-          console.error('Unable to extract window.runParams data.');
+          return prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.displayAmount
         }
+      };
+
+      var shippingInfo = () => {
+
+        if (prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.unreachable && prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.unreachable == true) {
+          var nonDz = { dz: false };
+          return nonDz;
+        } else {
+          var info = {
+            type: prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.deliveryProviderName,
+            source: prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.shipFromCode,
+            deliverDate: prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.deliveryDate,
+            deliverRange: `${prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.deliveryDayMin}-${prsd.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.guaranteedDeliveryTime}`
+          };
+          return info;
+        }
+      };
+
+      var discount = () => {
+        if (prsd.data.priceComponent.coinDiscountText == undefined) {
+          return "لا يوجد خصم إضافي ❎"
+        } else {
+          return prsd.data.priceComponent.coinDiscountText
+        }
+      };
+
+      const variants = () => {
+        const skuArray = JSON.parse(prsd.data.priceComponent.skuJson);
+        const resultArray = [];
+
+        if (prsd.data.skuComponent.hasSkuProperty) {
+
+          let shippingPropertyId = null;
+          const SKUPropertyList = [];
+
+          prsd.data.skuComponent.productSKUPropertyList.forEach((property) => {
+            if (property.skuPropertyId == 200007763) { // shipping sku
+              if (property.skuPropertyValues.length == 1) {
+                shippingPropertyId = property.skuPropertyValues[0].propertyValueId;
+              } else {
+                const matchingValue = property.skuPropertyValues.find((value) => value.skuPropertySendGoodsCountryCode == shippingInfo().source);
+                if (matchingValue) {
+                  shippingPropertyId = matchingValue.propertyValueIdLong;
+                }
+              }
+            } else {
+              SKUPropertyList.push(property);
+            }
+          });
+
+          if (shippingPropertyId != null) {
+            skuArray.forEach((sku) => {
+              if (sku.skuPropIds.includes(shippingPropertyId)) { resultArray.push(sku); }
+            });
+            const mappedResultArray = resultArray.map((result) => { return { attr: result.skuAttr.replace(/#[^;]+/g, match => match.replace(/[0-9]/g, '')).replace(/[^0-9:;]/g, '').replace(`;200007763:${shippingPropertyId}`, "").replace(`200007763:${shippingPropertyId};`, ""), id: result.skuId, idStr: result.skuIdStr, linked: result.skuPropIds, available: result.skuVal.availQuantity, price: result.skuVal.skuActivityAmount != undefined && result.skuVal.skuActivityAmount.value || result.skuVal.skuAmount.value, oldPrice: result.skuVal.skuAmount.value }; });
+            return { defAttr: prsd.data.skuComponent.selectedSkuAttr.replace(/#[^;]+/g, match => match.replace(/[0-9]/g, '')).replace(/[^0-9:;]/g, '').replace(`;200007763:${shippingPropertyId}`, "").replace(`200007763:${shippingPropertyId};`, ""), shippingid: `200007763:${shippingPropertyId}`, propinfo: mappedResultArray, props: SKUPropertyList };
+          } else {
+            const mappedskuArray = skuArray.map((result) => { return { attr: result.skuAttr.replace(/#[^;]+/g, match => match.replace(/[0-9]/g, '')).replace(/[^0-9:;]/g, ''), id: result.skuId, idStr: result.skuIdStr, linked: result.skuPropIds, available: result.skuVal.availQuantity, price: result.skuVal.skuActivityAmount != undefined && result.skuVal.skuActivityAmount.value || result.skuVal.skuAmount.value, oldPrice: result.skuVal.skuAmount.value }; });
+            return { defAttr: prsd.data.skuComponent.selectedSkuAttr.replace(/#[^;]+/g, match => match.replace(/[0-9]/g, '')).replace(/[^0-9:;]/g, ''), shippingid: "Auto", propinfo: mappedskuArray, props: SKUPropertyList };
+          }
+        }
+
+        return "No SKU property available";
+      };
+
+
+
+
+      var shaped = {
+        name: prsd.data.metaDataComponent.title.replace(" - AliExpress", "").replace("|", " "),
+        cover: prsd.data.imageComponent.imagePathList[0],
+        shipping: shipping(),
+        shippingInfo: shippingInfo(),
+        rate: prsd.data.feedbackComponent.evarageStar,
+        totalRates: prsd.data.feedbackComponent.totalValidNum,
+        price: prsd.data.priceComponent.origPrice.minAmount.value,
+        discountPrice: prsd.data.priceComponent.discountPrice.minActivityAmount != undefined && prsd.data.priceComponent.discountPrice.minActivityAmount.value || "No discount Price",
+        sales: prsd.data.tradeComponent.formatTradeCount,
+        discount: discount(),
+        variants: variants(),
+        store: prsd.data.sellerComponent.storeName,
+        storeRate: prsd.data.storeFeedbackComponent.sellerPositiveRate
+      };
+      //result['normal'] = shaped;
+      const skuArray = JSON.parse(prsd.data.priceComponent.skuJson);
+      const skuImagesArray = prsd.data.skuComponent;
+
+      // shipFromCode // webGeneralFreightCalculateComponent
+
+      res.json(shaped);
+    } else {
+      res.json({ ok: false });
+      console.error('Unable to extract window.runParams data.');
+    }
   } catch (error) {
-      console.log(error.message)
+    console.log(error.message)
   }
 });
 
@@ -364,7 +365,7 @@ app.get('/coinz', async (req, res) => {
     const pointsHtml = $1('script:contains("window.runParams")');
     const pointsContent = pointsHtml.html();
     const pointsMatch = /window\.runParams\s*=\s*({.*?});/s.exec(pointsContent);
-          
+
     if (pointsMatch && pointsMatch[1]) {
       const evalit = eval(`(${pointsMatch[1]})`);
       var stringEval = JSON.stringify(evalit);
@@ -400,9 +401,9 @@ app.get('/coinz', async (req, res) => {
 
       var shipping = () => {
         if (parseEval.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.displayAmount == undefined) {
-            return "Free Shipping"
+          return "Free Shipping"
         } else {
-            return parseEval.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.displayAmount
+          return parseEval.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.displayAmount
         }
       };
 
@@ -419,8 +420,8 @@ app.get('/coinz', async (req, res) => {
         total: total(),
         store: parseEval.data.sellerComponent.storeName,
         storeRate: parseEval.data.storeFeedbackComponent.sellerPositiveRate
-    };
-            
+      };
+
       res.json(shaped);
     } else {
       console.error('Unable to extract window.runParams data.');
@@ -607,6 +608,9 @@ app.get('/test', async (req, res) => {
 });
 
 app.listen(3000, () => {
+  console.log(`App is on port : 3000`);
+  keepAppRunning();
+});
   console.log(`App is on port : 3000`);
   keepAppRunning();
 });
