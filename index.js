@@ -14,7 +14,6 @@ app.get('/ping', (req, res) => {
   res.status(200).json({ message: 'Ping successful' });
 });
 
-
 function keepAppRunning() {
   setInterval(() => {
     https.get(`${process.env.RENDER_EXTERNAL_URL}/ping`, (resp) => {
