@@ -611,6 +611,3 @@ app.listen(3000, () => {
   console.log(`App is on port : 3000`);
   keepAppRunning();
 });
-  console.log(`App is on port : 3000`);
-  keepAppRunning();
-});
