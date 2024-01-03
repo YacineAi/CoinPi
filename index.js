@@ -95,7 +95,7 @@ app.get('/fetch', async (req, res) => {
                 shipping: shipping(),
                 rate: prsd.data.feedbackComponent.evarageStar,
                 totalRates: prsd.data.feedbackComponent.totalValidNum,
-              price: prsd.data.priceComponent.discountPrice.minActivityAmount.formatedAmount,
+                price: parseEval.data.priceComponent.origPrice.minAmount.formatedAmount,
                 discountPrice: prsd.data.priceComponent.discountPrice.minActivityAmount != undefined && prsd.data.priceComponent.discountPrice.minActivityAmount.formatedAmount || "No discount Price",
                 sales: prsd.data.tradeComponent.formatTradeCount,
                 discount: discount(),
