@@ -47,10 +47,10 @@ app.get('/fetch', async (req, res) => {
 
 
     const requests = [
-      axios.get(`https://ar.aliexpress.com/item/${id}.html`, { headers }),
-      axios.get(`https://ar.aliexpress.com/i/${id}.html?sourceType=620&aff_fcid=`, { headers }),
-      axios.get(`https://ar.aliexpress.com/i/${id}.html?sourceType=562&aff_fcid=`, { headers }),
-      axios.get(`https://ar.aliexpress.com/i/${id}.html?sourceType=561&aff_fcid=`, { headers })
+      axios.get(`https://www.aliexpress.com/item/${id}.html`, { headers }),
+      axios.get(`https://www.aliexpress.com/i/${id}.html?sourceType=620&aff_fcid=`, { headers }),
+      axios.get(`https://www.aliexpress.com/i/${id}.html?sourceType=562&aff_fcid=`, { headers }),
+      axios.get(`https://www.aliexpress.com/i/${id}.html?sourceType=561&aff_fcid=`, { headers })
     ];
 
     const responses = await Promise.all(requests);
