@@ -385,7 +385,6 @@ app.get('/fetch', async (req, res) => {
       res.json({ ok : false});
       console.error(`Unable to extract data from response ${index + 1}.`);
     }
-    res.json(result);
   } catch (error) {
     console.error('Error fetching data:', error);
     res.status(500).json({ error: 'Internal Server Error' });
