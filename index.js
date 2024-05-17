@@ -26,7 +26,7 @@ function keepAppRunning() {
   }, 5 * 60 * 1000);
 }
 
-app.get('/fetch', async (req, res) => {
+app.get('/fetch2', async (req, res) => {
   const { id } = req.query;
   const { region } = req.query;
   const defaultRegion = region || "DZ";
@@ -367,12 +367,12 @@ app.get('/coinz', async (req, res) => {
 
 
 
-app.get('/fetch2', async (req, res) => {
+app.get('/fetch', async (req, res) => {
   const { id } = req.query;
   try {
     const requests = [
-      axios.get(`https://coin-asia.onrender.com/fetch?id=${id}`),
-      axios.get(`https://coin-europe.onrender.com/fetch?id=${id}`)
+      axios.get(`https://coin-asia.onrender.com/fetch2?id=${id}`),
+      axios.get(`https://coin-europe.onrender.com/fetch2?id=${id}`)
     ];
 
     const responses = await Promise.all(requests);
