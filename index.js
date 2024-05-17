@@ -383,7 +383,6 @@ app.get('/fetch', async (req, res) => {
       res.json(responses[1].data);
     } else {
       res.json({ ok : false});
-      console.error(`Unable to extract data from response ${index + 1}.`);
     }
   } catch (error) {
     console.error('Error fetching data:', error);
