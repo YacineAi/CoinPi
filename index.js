@@ -43,10 +43,8 @@ app.get('/fetch', async (req, res) => {
   };
 
   try {
-    const result = {
-      "ok": true
-    };
-
+    const result = { "ok": true };
+    let extractionFailed = false;
 
     const requests = [
       axios.get(`https://ar.aliexpress.com/item/${id}.html`, { headers }),
@@ -65,138 +63,71 @@ app.get('/fetch', async (req, res) => {
 
       if (match && match[1] && match[1].length > 1000) {
         const data = eval(`(${match[1]})`);
+        let shaped;
 
         switch (index) {
           case 0: // Normal
-          var shipping = () => {
-            if (data.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.displayAmount == undefined) {
-              return "Free Shipping"
-            } else {
-              return data.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.displayAmount
-            }
-          };
-          
-          var discount = () => {
-            if (data.data.priceComponent.coinDiscountText == undefined) {
-              return "لا يوجد خصم إضافي ❎"
-            } else {
-              return data.data.priceComponent.coinDiscountText
-            }
-          };
-
-          var coupon = () => {
-            if (data.data.webCouponInfoComponent.promotionPanelDTO.shopCoupon == undefined) {
-              return "لا يوجد كوبونات ❎"
-            } else {
-              let copo = []
-              for (const promotion of data.data.webCouponInfoComponent.promotionPanelDTO.shopCoupon) {
-                for (const coupon of promotion.promotionPanelDetailDTOList) {
-                  const content = {
-                    code: coupon.attributes.couponCode,
-                    detail: coupon.promotionDetail,
-                    desc: coupon.promotionDesc,
-                  };
-                  copo.push(content)
-                }
-              }
-              return copo
-            }
-          };
-          
-          var shaped = {
-            name: data.data.metaDataComponent.title.replace("| |   - AliExpress", ""),
-            image: data.data.imageComponent.imagePathList[0],
-            shipping: shipping(),
-            rate: data.data.feedbackComponent.evarageStar,
-            totalRates: data.data.feedbackComponent.totalValidNum,
-            price: data.data.priceComponent.origPrice.minAmount.formatedAmount,
-            discountPrice: data.data.priceComponent.discountPrice.minActivityAmount != undefined && data.data.priceComponent.discountPrice.minActivityAmount.formatedAmount || "No discount Price",
-            sales: data.data.tradeComponent.formatTradeCount,
-            discount: discount(),
-            coupon: coupon(),
-            store: data.data.sellerComponent.storeName,
-            storeRate: data.data.storeFeedbackComponent.sellerPositiveRate
-          };
-          
-          result['normal'] = shaped;
-          break;
+            shaped = {
+              name: data.data.metaDataComponent.title.replace("| |   - AliExpress", ""),
+              image: data.data.imageComponent.imagePathList[0],
+              shipping: data.data.webGeneralFreightCalculateComponent.originalLayoutResultList[0].bizData.displayAmount || "Free Shipping",
+              rate: data.data.feedbackComponent.evarageStar,
+              totalRates: data.data.feedbackComponent.totalValidNum,
+              price: data.data.priceComponent.origPrice.minAmount.formatedAmount,
+              discountPrice: data.data.priceComponent.discountPrice.minActivityAmount?.formatedAmount || "No discount Price",
+              sales: data.data.tradeComponent.formatTradeCount,
+              discount: data.data.priceComponent.coinDiscountText || "لا يوجد خصم إضافي ❎",
+              coupon: data.data.webCouponInfoComponent.promotionPanelDTO.shopCoupon?.map(promo => promo.promotionPanelDetailDTOList.map(coupon => ({
+                code: coupon.attributes.couponCode,
+                detail: coupon.promotionDetail,
+                desc: coupon.promotionDesc
+              }))) || "لا يوجد كوبونات ❎",
+              store: data.data.sellerComponent.storeName,
+              storeRate: data.data.storeFeedbackComponent.sellerPositiveRate
+            };
+            result['normal'] = shaped;
+            break;
           case 1: // Points
-          var discount = () => {
-            if (data.data.priceComponent.coinDiscountText == undefined) {
-              return "لا توجد نسبة تخفيض بالعملات ❎"
-            } else {
-              var clean = data.data.priceComponent.coinDiscountText.match(/\d+/g);
-              return `خصم النقاط ${clean}%`
-            }
-          };
-
-          var price_fun = () => {
-            if (data.data.priceComponent.discountPrice.minActivityAmount != undefined) {
-              return data.data.priceComponent.discountPrice.minActivityAmount.formatedAmount;
-            } else {
-              return data.data.priceComponent.origPrice.minAmount.formatedAmount;
-            }
-          };
-          
-          var total = () => {
-            if (data.data.priceComponent.coinDiscountText != undefined) {
-              var pers = data.data.priceComponent.coinDiscountText.match(/\d+/g);
-              var prs = price_fun().match(/\d+/g);
-              const total = parseInt(prs) - (parseInt(prs) * parseInt(pers)) / 100;
-              return `US $${total.toFixed(2)}`;
-            } else {
-              return price_fun();
-            }
-          };
-          
-          var shaped = {
-            discountPrice: price_fun(),
-            discount: discount(),
-            total: total(),
-          };
-        
-          result['points'] = shaped;
-          break;
+            shaped = {
+              discountPrice: data.data.priceComponent.discountPrice.minActivityAmount?.formatedAmount || data.data.priceComponent.origPrice.minAmount.formatedAmount,
+              discount: data.data.priceComponent.coinDiscountText ? `خصم النقاط ${data.data.priceComponent.coinDiscountText.match(/\d+/g)}%` : "لا توجد نسبة تخفيض بالعملات ❎",
+              total: data.data.priceComponent.coinDiscountText
+                ? `US $${(parseInt(data.data.priceComponent.origPrice.minAmount.formatedAmount.match(/\d+/g)) * (1 - parseInt(data.data.priceComponent.coinDiscountText.match(/\d+/g)) / 100)).toFixed(2)}`
+                : data.data.priceComponent.discountPrice.minActivityAmount?.formatedAmount || data.data.priceComponent.origPrice.minAmount.formatedAmount
+            };
+            result['points'] = shaped;
+            break;
           case 2: // Super
-          var price_fun = () => {
-            if (data.data.priceComponent.discountPrice.minActivityAmount != undefined) {
-              return data.data.priceComponent.discountPrice.minActivityAmount.formatedAmount;
-            } else {
-              return data.data.priceComponent.origPrice.minAmount.formatedAmount;
-            }
-          };
-          
-          var shaped = {
-            price: price_fun(),
-          };
-
-          result['super'] = shaped;
-          break;
+            shaped = {
+              price: data.data.priceComponent.discountPrice.minActivityAmount?.formatedAmount || data.data.priceComponent.origPrice.minAmount.formatedAmount
+            };
+            result['super'] = shaped;
+            break;
           case 3: // Limited
-          var price_fun = () => {
-            if (data.data.priceComponent.discountPrice.minActivityAmount != undefined) {
-              return data.data.priceComponent.discountPrice.minActivityAmount.formatedAmount;
-            } else {
-              return data.data.priceComponent.origPrice.minAmount.formatedAmount;
-            }
-          };
-          
-          var shaped = {
-            price: price_fun(),
-          };
-          result['limited'] = shaped;
-          break;
+            shaped = {
+              price: data.data.priceComponent.discountPrice.minActivityAmount?.formatedAmount || data.data.priceComponent.origPrice.minAmount.formatedAmount
+            };
+            result['limited'] = shaped;
+            break;
+          default:
+            break;
         }
-
       } else {
-        res.json({ ok : false});
+        extractionFailed = true;
         console.error(`Unable to extract data from response ${index + 1}.`);
       }
     });
-    res.json(result);
+
+    if (extractionFailed) {
+      res.json({ ok: false });
+    } else {
+      res.json(result);
+    }
   } catch (error) {
     console.error('Error fetching data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    if (!res.headersSent) {
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
   }
 });
 
