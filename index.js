@@ -440,16 +440,16 @@ app.get('/fetch2', async (req, res) => {
   const { id } = req.query;
   try {
     const requests = [
-      axios.get(`https://www.aliexpress.com/item/${id}`),
-      axios.get(`https://ar.aliexpress.com/i/${id}`)
+      axios.get(`https://coin-asia.onrender.com/fetch?id=${id}`),
+      axios.get(`https://coin-europe.onrender.com/fetch?id=${id}`)
     ];
 
     const responses = await Promise.all(requests);
 
     if (responses[0].data.ok != false) {
-      // asia
+      res.json(responses[0].data);
     } else if (responses[1].data.ok != false) {
-      // ger
+      res.json(responses[1].data);
     } else {
       res.json({ ok : false});
       console.error(`Unable to extract data from response ${index + 1}.`);
