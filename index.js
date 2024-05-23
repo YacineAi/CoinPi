@@ -5,7 +5,7 @@ const app = express();
 const https = require('https');
 
 const { createClient } = require('@supabase/supabase-js');
-const supabase = createClient(process.env.SB_URL, process.env.SB_KEY, { auth: { persistSession: false} });
+const supabase = createClient(process.env.SB_URL || "https://db.supabase.io/", process.env.SB_KEY || "token123", { auth: { persistSession: false} });
 
 async function createPd(product) {
   const { data, error } = await supabase
@@ -409,7 +409,7 @@ app.get('/fetch', async (req, res) => {
   const check = await pdDb(id);
 
   if (check[0]) {
-    await updatePd(id, {month: check[0].month++})
+    await updatePd(id, {month: check[0].month + 1})
     .then(async (data, err) => {
       try {
         const requests = [
