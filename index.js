@@ -4,6 +4,47 @@ const express = require('express');
 const app = express();
 const https = require('https');
 
+const { createClient } = require('@supabase/supabase-js');
+const supabase = createClient(process.env.SB_URL, process.env.SB_KEY, { auth: { persistSession: false} });
+
+async function createPd(product) {
+  const { data, error } = await supabase
+  .from('products')
+  .insert([ product ]);
+
+  if (error) {
+      throw new Error('Error creating user : ', error);
+  } else {
+      return data
+  }
+};
+
+async function updatePd(id, update) {
+  const { data, error } = await supabase
+  .from('products')
+  .update( update )
+  .eq('id', id);
+  
+  if (error) {
+      throw new Error('Error updating user : ', error);
+  } else {
+      return data
+  }
+};
+
+async function pdDb(id) {
+  const { data, error } = await supabase
+  .from('products')
+  .select('*')
+  .eq('id', id);
+
+  if (error) {
+      console.error('Error checking user:', error);
+  } else {
+      return data
+  }
+};
+
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -363,30 +404,56 @@ app.get('/coinz', async (req, res) => {
   }
 });
 
-
-
-
-
 app.get('/fetch', async (req, res) => {
   const { id } = req.query;
-  try {
-    const requests = [
-      axios.get(`https://coin-asia.onrender.com/fetch2?id=${id}`),
-      axios.get(`https://coin-europe.onrender.com/fetch2?id=${id}`)
-    ];
+  const check = await pdDb(id);
 
-    const responses = await Promise.all(requests);
-
-    if (responses[0].data.ok != false) {
-      res.json(responses[0].data);
-    } else if (responses[1].data.ok != false) {
-      res.json(responses[1].data);
-    } else {
-      res.json({ ok : false});
-    }
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+  if (check[0]) {
+    await updatePd(id, {month: check[0].month++})
+    .then(async (data, err) => {
+      try {
+        const requests = [
+          axios.get(`https://coin-asia.onrender.com/fetch2?id=${id}`),
+          axios.get(`https://coin-europe.onrender.com/fetch2?id=${id}`)
+        ];
+    
+        const responses = await Promise.all(requests);
+    
+        if (responses[0].data.ok != false) {
+          res.json(responses[0].data);
+        } else if (responses[1].data.ok != false) {
+          res.json(responses[1].data);
+        } else {
+          res.json({ ok : false});
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    });
+  } else {
+    await createPd({id: id, date: new Date().getTime(), week: 1, month: 1})
+    .then(async (data, err) => {
+      try {
+        const requests = [
+          axios.get(`https://coin-asia.onrender.com/fetch2?id=${id}`),
+          axios.get(`https://coin-europe.onrender.com/fetch2?id=${id}`)
+        ];
+    
+        const responses = await Promise.all(requests);
+    
+        if (responses[0].data.ok != false) {
+          res.json(responses[0].data);
+        } else if (responses[1].data.ok != false) {
+          res.json(responses[1].data);
+        } else {
+          res.json({ ok : false});
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    });
   }
 });
 
