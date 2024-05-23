@@ -457,6 +457,40 @@ app.get('/fetch', async (req, res) => {
   }
 });
 
+
+
+app.get('/db', async (req, res) => {
+  const { id } = req.query;
+  const check = await pdDb(id);
+
+  if (check[0]) {
+    res.json(check[0]);
+  } else {
+    await createPd({id: id, date: new Date().getTime(), week: 1, month: 1})
+    .then(async (data, err) => {
+      try {
+        const requests = [
+          axios.get(`https://coin-asia.onrender.com/fetch2?id=${id}`),
+          axios.get(`https://coin-europe.onrender.com/fetch2?id=${id}`)
+        ];
+    
+        const responses = await Promise.all(requests);
+    
+        if (responses[0].data.ok != false) {
+          res.json(responses[0].data);
+        } else if (responses[1].data.ok != false) {
+          res.json(responses[1].data);
+        } else {
+          res.json({ ok : false});
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+        res.status(500).json({ error: 'Internal Server Error' });
+      }
+    });
+  }
+});
+
 app.listen(3000, () => {
   console.log(`App is on port : 3000`);
   keepAppRunning();
