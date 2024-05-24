@@ -67,7 +67,7 @@ function keepAppRunning() {
   }, 5 * 60 * 1000);
 }
 
-app.get('/fetch2', async (req, res) => {
+app.get('/fetch', async (req, res) => {
   const { id } = req.query;
   const { region } = req.query;
   const defaultRegion = region || "DZ";
@@ -404,7 +404,7 @@ app.get('/coinz', async (req, res) => {
   }
 });
 
-app.get('/fetch', async (req, res) => {
+app.get('/fetch2', async (req, res) => {
   const { id } = req.query;
   const check = await pdDb(id);
 
